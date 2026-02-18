@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --background: #121212;
+  --foreground: #FFE600;
+  --surface: #1E1E1E;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-neon: #FFE600;
+  --color-dark-gray: #121212;
+  /* Override default gray with neutral/zinc to remove blue tint */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-600: #525252;
+  --color-gray-700: #404040;
+  --color-gray-800: #262626;
+  --color-gray-900: #171717;
+  --color-gray-950: #0a0a0a;
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: light) {
+  /* ... */
+}
+
+body {
+  background: #121212;
+  /* Force dark gray */
+  color: #CCFF00;
+  /* Force neon yellow */
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.neon-text {
+  color: #FFE600;
+  text-shadow: 0 0 5px rgba(255, 230, 0, 0.8), 0 0 10px rgba(255, 230, 0, 0.3);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #121212;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FFE600;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E6CF00;
+}
