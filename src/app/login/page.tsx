@@ -62,7 +62,7 @@ export default function LoginPage() {
                     </button>
                 </form>
                 <div className="mt-4 text-xs text-center text-[#FFE600] opacity-70 space-y-2">
-                    <p>Teste com: admin@test.com, operador@test.com</p>
+
                     <p>
                         <a href="/register" className="text-[#FFE600] hover:text-[#FFE600] font-bold underline decoration-yellow-600/50 hover:decoration-[#FFE600]">
                             Criar nova conta
