@@ -5,7 +5,7 @@ import { usePermission } from '@/hooks/usePermission';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { dataService } from '@/services/dataService';
-import { useToast } from '@/contexts/ToastContext';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { ChevronDown, ChevronUp, User } from 'lucide-react';
 
@@ -25,10 +25,10 @@ interface Vendedor {
 export default function VendedoresPage() {
     const { hasRole, loading: authLoading } = usePermission();
     const router = useRouter();
-    const { showToast } = useToast();
+
     const { user } = useAuth();
     const [vendedores, setVendedores] = useState<Vendedor[]>([]);
-    const [loading, setLoading] = useState(true);
+
     const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
@@ -56,17 +56,13 @@ export default function VendedoresPage() {
                 }
 
                 setVendedores(dataArray);
-                showToast('Dados de vendedores carregados', 'success');
             } catch (error) {
                 console.error('Error fetching vendedores:', error);
-                showToast('Erro ao carregar vendedores', 'error');
-            } finally {
-                setLoading(false);
             }
         };
 
         fetchData();
-    }, [authLoading, hasRole, showToast]);
+    }, [authLoading, hasRole]);
 
     const toggleRow = (id: string | number) => {
         setExpandedRows(prev => ({
@@ -75,16 +71,7 @@ export default function VendedoresPage() {
         }));
     };
 
-    if (authLoading || loading) {
-        return (
-            <div className="flex h-screen bg-[var(--background)] items-center justify-center">
-                <div className="flex flex-col items-center space-y-4">
-                    <div className="skeleton h-4 w-48"></div>
-                    <div className="skeleton h-3 w-32"></div>
-                </div>
-            </div>
-        );
-    }
+    if (authLoading) return null;
 
     if (!hasRole(['admin', 'operador'])) return null;
 
@@ -101,7 +88,7 @@ export default function VendedoresPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-[var(--surface-highlight)] border-b border-[var(--border)] text-[var(--muted)] uppercase text-xs font-semibold tracking-wider">
+                                <tr className="bg-[var(--surface-highlight)] border-b border-[var(--border)] text-[#C0C0C0] uppercase text-xs font-semibold tracking-wider">
                                     <th className="p-4">ID</th>
                                     <th className="p-4">Nome</th>
                                     <th className="p-4 text-center">Quantidade Zaps</th>

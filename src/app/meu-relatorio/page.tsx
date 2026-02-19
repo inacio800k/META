@@ -5,7 +5,7 @@ import { usePermission } from '@/hooks/usePermission';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { dataService } from '@/services/dataService';
-import { useToast } from '@/contexts/ToastContext';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { ExternalLink } from 'lucide-react';
 
@@ -23,10 +23,10 @@ interface ReportItem {
 export default function MeuRelatorioPage() {
     const { hasRole, loading: authLoading } = usePermission();
     const router = useRouter();
-    const { showToast } = useToast();
+
     const { user } = useAuth();
     const [reportData, setReportData] = useState<ReportItem[]>([]);
-    const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         if (!authLoading && !hasRole(['vendedor'])) {
@@ -53,28 +53,15 @@ export default function MeuRelatorioPage() {
                 }
 
                 setReportData(dataArray);
-                showToast('Relatório carregado', 'success');
             } catch (error) {
                 console.error('Error fetching meu relatorio:', error);
-                showToast('Erro ao carregar relatório', 'error');
-            } finally {
-                setLoading(false);
             }
         };
 
         fetchData();
-    }, [authLoading, hasRole, showToast, user]);
+    }, [authLoading, hasRole, user]);
 
-    if (authLoading || loading) {
-        return (
-            <div className="flex h-screen bg-[var(--background)] items-center justify-center">
-                <div className="flex flex-col items-center space-y-4">
-                    <div className="skeleton h-4 w-48"></div>
-                    <div className="skeleton h-3 w-32"></div>
-                </div>
-            </div>
-        );
-    }
+    if (authLoading) return null;
 
     if (!hasRole(['vendedor'])) return null;
 

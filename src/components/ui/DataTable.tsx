@@ -21,16 +21,16 @@ export const DataTable = <T,>({ data, columns, title, actions }: DataTableProps<
                     <h3 className="font-semibold text-[var(--foreground)] tracking-tight">{title}</h3>
                 </div>
             )}
-            <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-[var(--border)]">
+            <div className="overflow-hidden">
+                <table className="w-full divide-y divide-[var(--border)]" style={{ tableLayout: 'auto' }}>
                     <thead className="bg-[var(--surface-highlight)] border-b-2 gold-underline">
                         <tr>
                             {columns.map((col, idx) => (
-                                <th key={idx} className="px-6 py-4 text-left text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">
+                                <th key={idx} className="px-6 py-4 text-left text-xs font-semibold text-[#C0C0C0] uppercase tracking-wider">
                                     {col.header}
                                 </th>
                             ))}
-                            {actions && <th className="px-6 py-4 text-right text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Ações</th>}
+                            {actions && <th className="px-6 py-4 text-right text-xs font-semibold text-[#C0C0C0] uppercase tracking-wider">Ações</th>}
                         </tr>
                     </thead>
                     <tbody className="bg-[var(--surface)] divide-y divide-[var(--border)]">

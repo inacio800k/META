@@ -5,7 +5,8 @@ import { usePermission } from '@/hooks/usePermission';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { dataService } from '@/services/dataService';
-import { Send, MessageSquare, Eye, Tag, Hash, FileText, ChevronDown, Check } from 'lucide-react';
+import { Send, MessageSquare, Eye, Tag, Hash, FileText, ChevronDown, Check, Search, Building2 } from 'lucide-react';
+import { ClientSelectionModal } from '@/components/ClientSelectionModal';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -27,6 +28,12 @@ export default function MessagesPage() {
     const [isTagsMenuOpen, setIsTagsMenuOpen] = useState(false);
     const [demanda, setDemanda] = useState('');
     const [numeroCliente, setNumeroCliente] = useState('');
+    const [empresa, setEmpresa] = useState('');
+    const [tipoCliente, setTipoCliente] = useState('');
+    const [searchingClients, setSearchingClients] = useState(false);
+    const [clientResults, setClientResults] = useState<any[]>([]);
+    const [selectedClient, setSelectedClient] = useState<any>(null);
+    const [isClientModalOpen, setIsClientModalOpen] = useState(false);
 
     const templateDropdownRef = useRef<HTMLDivElement>(null);
     const tagsDropdownRef = useRef<HTMLDivElement>(null);
@@ -181,9 +188,9 @@ export default function MessagesPage() {
 
             await dataService.sendMessage(payload);
             showToast('Mensagem enviada com sucesso!', 'success');
-        } catch (error) {
-            showToast('Erro ao enviar mensagem', 'error');
-            console.error(error);
+        } catch (error: any) {
+            const msg = error?.message || 'Erro ao enviar mensagem';
+            showToast(msg, 'error');
         } finally {
             setLoading(false);
         }
@@ -251,11 +258,134 @@ export default function MessagesPage() {
                                 </div>
                             </div>
 
-                            {/* Step 2: Template */}
+                            {/* Step 2: Cliente */}
+                            {selectedSession && (
+                                <div className="premium-card rounded-xl p-6 relative z-40 animate-fade-in" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
+                                    <div className="flex items-center space-x-3 mb-4">
+                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'linear-gradient(135deg, #BF953F, #D4AF37)', color: '#1A1200' }}>2</div>
+                                        <h3 className="text-sm font-bold uppercase tracking-wider" style={silverGradientStyle}>Cliente</h3>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="flex items-center text-xs font-bold text-[var(--muted)] mb-2 uppercase tracking-wider">
+                                                    <Building2 size={12} className="mr-1.5" /> Empresa
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    inputMode="numeric"
+                                                    pattern="[0-9]*"
+                                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] p-3 text-sm placeholder-[var(--muted)] transition-all focus:outline-none"
+                                                    style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)', color: silverTextLight }}
+                                                    value={empresa}
+                                                    onChange={(e) => setEmpresa(e.target.value.replace(/\D/g, ''))}
+                                                    placeholder="Código da empresa..."
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="flex items-center text-xs font-bold text-[var(--muted)] mb-2 uppercase tracking-wider">
+                                                    <Tag size={12} className="mr-1.5" /> Tipo
+                                                </label>
+                                                <div className="relative">
+                                                    <select
+                                                        className="w-full rounded-lg bg-[var(--background)] p-3 pr-10 border border-[var(--border)] transition-all text-sm focus:outline-none appearance-none cursor-pointer"
+                                                        style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)', color: silverTextLight }}
+                                                        value={tipoCliente}
+                                                        onChange={(e) => setTipoCliente(e.target.value)}
+                                                    >
+                                                        <option value="">Selecione o tipo...</option>
+                                                        <option value="Abandono">Abandono</option>
+                                                        <option value="pago">Pós</option>
+                                                        <option value="recusado">Cartão Cancelado</option>
+                                                    </select>
+                                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            disabled={searchingClients || !empresa || !tipoCliente}
+                                            onClick={async () => {
+                                                setSearchingClients(true);
+                                                try {
+                                                    const sessionData = sessions.find(s => (s.sessao || s.id) === selectedSession);
+                                                    const res = await fetch('/api/messages/search-clients', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({
+                                                            sessao: sessionData,
+                                                            empresa,
+                                                            tipo: tipoCliente,
+                                                        }),
+                                                    });
+                                                    const data = await res.json();
+                                                    if (!res.ok) {
+                                                        showToast(data.error || 'Erro ao buscar cliente', 'error');
+                                                        setSelectedClient(null);
+                                                    } else {
+                                                        // Assuming the API returns the client object directly or in a specific field
+                                                        const clientResult = Array.isArray(data) ? data[0] : (data.cliente || data.result || data);
+
+                                                        if (clientResult) {
+                                                            setSelectedClient(clientResult);
+                                                            showToast('Cliente encontrado com sucesso!', 'success');
+                                                        } else {
+                                                            setSelectedClient(null);
+                                                            showToast('Nenhum cliente encontrado com os dados informados.', 'error');
+                                                        }
+                                                    }
+                                                } catch (error: any) {
+                                                    console.error(error);
+                                                    showToast(error?.message || 'Erro ao buscar cliente', 'error');
+                                                    setSelectedClient(null);
+                                                } finally {
+                                                    setSearchingClients(false);
+                                                }
+                                            }}
+                                            className="flex items-center justify-center space-x-2 w-full py-3 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-bold text-sm tracking-wide transition-all"
+                                            style={{
+                                                background: 'linear-gradient(145deg, #92700C 0%, #BF9B30 15%, #DBCA6E 35%, #FFEC8A 50%, #DBCA6E 65%, #BF9B30 85%, #92700C 100%)',
+                                                color: '#1A1200',
+                                                border: '1px solid rgba(255,236,138,0.3)',
+                                                boxShadow: '0 4px 15px rgba(212,175,55,0.3), inset 0 1px 0 rgba(255,250,220,0.4)',
+                                                textShadow: '0 1px 0 rgba(255,250,220,0.3)',
+                                            }}
+                                        >
+                                            <Search size={16} />
+                                            <span>{searchingClients ? 'Buscando...' : 'Buscar Cliente'}</span>
+                                        </button>
+
+                                        {/* Selected Client Details */}
+                                        {selectedClient && (
+                                            <div className="space-y-4 mt-4 animate-fade-in">
+                                                <div className="rounded-lg border border-[var(--border)] bg-[var(--background)] overflow-hidden" style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.15)' }}>
+                                                    <div className="px-4 py-2.5 border-b border-[var(--border)]" style={{ background: 'rgba(212,175,55,0.06)' }}>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#D4AF37' }}>Detalhes do Cliente</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="divide-y divide-[var(--border)]">
+                                                        {Object.entries(selectedClient).map(([key, value]) => (
+                                                            <div key={key} className="flex items-start px-4 py-2.5 hover:bg-[var(--surface-highlight)] transition-colors">
+                                                                <span className="text-xs font-bold uppercase tracking-wider min-w-[140px] shrink-0" style={{ color: '#A8ABB2' }}>{key}</span>
+                                                                <span className="text-sm ml-3" style={{ color: silverTextLight }}>{String(value ?? '-')}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Step 3: Template */}
                             {selectedSession && (
                                 <div className="premium-card rounded-xl p-6 relative z-30 animate-fade-in" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
                                     <div className="flex items-center space-x-3 mb-4">
-                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'linear-gradient(135deg, #BF953F, #D4AF37)', color: '#1A1200' }}>2</div>
+                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'linear-gradient(135deg, #BF953F, #D4AF37)', color: '#1A1200' }}>3</div>
                                         <h3 className="text-sm font-bold uppercase tracking-wider" style={silverGradientStyle}>Template</h3>
                                         <span className="text-xs text-[var(--muted)] ml-auto">{templates.length} disponíveis</span>
                                     </div>
@@ -302,11 +432,11 @@ export default function MessagesPage() {
                                 </div>
                             )}
 
-                            {/* Step 3: Variáveis */}
+                            {/* Step 4: Variáveis */}
                             {selectedTemplate && selectedTemplate.variaveis && Array.isArray(selectedTemplate.variaveis) && selectedTemplate.variaveis.length > 0 && (
                                 <div className="premium-card rounded-xl p-6 relative z-20 animate-fade-in" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
                                     <div className="flex items-center space-x-3 mb-4">
-                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'linear-gradient(135deg, #BF953F, #D4AF37)', color: '#1A1200' }}>3</div>
+                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'linear-gradient(135deg, #BF953F, #D4AF37)', color: '#1A1200' }}>4</div>
                                         <h3 className="text-sm font-bold uppercase tracking-wider" style={silverGradientStyle}>Variáveis</h3>
                                     </div>
                                     <div className="space-y-4">
@@ -330,12 +460,12 @@ export default function MessagesPage() {
                                 </div>
                             )}
 
-                            {/* Step 4: Chatwoot / Tags / Demanda */}
+                            {/* Step 5: Chatwoot / Tags / Demanda */}
                             {selectedSession && (
                                 <div className="premium-card rounded-xl p-6 relative z-10 animate-fade-in" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
                                     <div className="flex items-center space-x-3 mb-5">
                                         <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'linear-gradient(135deg, #BF953F, #D4AF37)', color: '#1A1200' }}>
-                                            {selectedTemplate?.variaveis?.length > 0 ? '4' : '3'}
+                                            {selectedTemplate?.variaveis?.length > 0 ? '5' : '4'}
                                         </div>
                                         <h3 className="text-sm font-bold uppercase tracking-wider" style={silverGradientStyle}>Chatwoot</h3>
                                     </div>
@@ -424,11 +554,15 @@ export default function MessagesPage() {
                                                 </label>
                                                 <input
                                                     type="text"
+                                                    inputMode="numeric"
+                                                    pattern="[0-9]*"
+                                                    minLength={10}
+                                                    maxLength={13}
                                                     className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] p-3 text-sm placeholder-[var(--muted)] transition-all focus:outline-none"
                                                     style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)', color: silverTextLight }}
                                                     value={numeroCliente}
-                                                    onChange={(e) => setNumeroCliente(e.target.value)}
-                                                    placeholder="Digite o número..."
+                                                    onChange={(e) => setNumeroCliente(e.target.value.replace(/\D/g, '').slice(0, 13))}
+                                                    placeholder="Min 10, máx 13 dígitos"
                                                 />
                                             </div>
                                         </div>
@@ -554,6 +688,13 @@ export default function MessagesPage() {
                     </div>
                 </div>
             </main>
+
+            <ClientSelectionModal
+                isOpen={isClientModalOpen}
+                onClose={() => setIsClientModalOpen(false)}
+                clients={clientResults}
+                onSelect={(client) => setSelectedClient(client)}
+            />
         </div>
     );
 }
