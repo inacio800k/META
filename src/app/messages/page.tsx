@@ -215,7 +215,7 @@ export default function MessagesPage() {
     const silverTextLight = '#BEC1C8';
 
     return (
-        <div className="flex bg-[var(--background)] min-h-screen overflow-hidden">
+        <div className="flex bg-[var(--background)] h-screen overflow-hidden">
             <Sidebar />
             <main className="flex-1 ml-64 h-full overflow-y-auto p-8 pb-12">
                 {/* Header */}
@@ -586,7 +586,7 @@ export default function MessagesPage() {
                     </div>
 
                     {/* Right Column: Preview (2 cols) */}
-                    <div className="lg:col-span-2 space-y-6 h-fit lg:sticky lg:top-8">
+                    <div className="lg:col-span-2 space-y-6 lg:sticky lg:top-8 self-start">
                         {/* Preview Card */}
                         <div className="premium-card rounded-xl p-6 relative" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
                             <div className="flex items-center space-x-3 mb-5">
@@ -604,7 +604,7 @@ export default function MessagesPage() {
                                     {/* Template Meta */}
                                     <div className="flex justify-between items-center">
                                         <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md" style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}>
-                                            {selectedTemplate.nome}
+                                            {selectedTemplate.categoria}
                                         </span>
                                         {selectedTemplate.linguagem === 'pt_BR' ? (
                                             <img src="https://flagcdn.com/w40/br.png" alt="Brasil" title="Português (Brasil)" className="w-7 h-auto rounded shadow-sm opacity-80" />
