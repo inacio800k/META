@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Home, Users, FileText, Send } from 'lucide-react';
+import { LogOut, Home, Users, FileText, Send, PieChart } from 'lucide-react';
 
 export const Sidebar = () => {
     const { user, logout } = useAuth();
@@ -9,97 +9,61 @@ export const Sidebar = () => {
 
     if (!user) return null;
 
+    const isActive = (path: string) => pathname === path;
+
+    const navItems = [
+        { href: '/', label: 'Dashboard', icon: Home, roles: ['admin', 'operador', 'vendedor'] },
+        { href: '/sessions', label: 'Sessões', icon: Users, roles: ['admin', 'operador'] },
+        { href: '/vendedores', label: 'Vendedores', icon: Users, roles: ['admin', 'operador'] },
+        { href: '/reports', label: 'Relatórios', icon: FileText, roles: ['admin'] },
+        { href: '/meu-relatorio', label: 'Meu Relatório', icon: PieChart, roles: ['vendedor'] },
+        { href: '/messages', label: 'Mensagens', icon: Send, roles: ['admin', 'vendedor'] },
+        { href: '/users', label: 'Usuários', icon: Users, roles: ['admin'] },
+    ];
+
     return (
-        <div className="h-screen w-64 bg-[#1E1E1E] border-r border-[#333] text-[#FFE600] flex flex-col fixed left-0 top-0">
-            <div className="p-6 border-b border-[#333]">
-                <h2 className="text-xl font-bold neon-text">Gestão Vendedores</h2>
-                <p className="text-xs text-[#FFE600] opacity-80 mt-1">Olá, {user.name} ({user.role})</p>
+        <div className="h-screen w-64 bg-[var(--surface)] border-r border-[var(--border)] text-[var(--muted)] flex flex-col fixed left-0 top-0 z-50 transition-all duration-300">
+            <div className="p-6 border-b border-[var(--border)]">
+                <h2 className="text-xl font-bold text-[var(--foreground)] tracking-tight">
+                    Meta<span className="gold-gradient animate-glow-breathe">Vendedores</span>
+                </h2>
+                <div className="mt-2 flex items-center space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse"></div>
+                    <p className="text-xs text-[var(--muted)] font-medium">
+                        {user.name} <span className="opacity-50">({user.role})</span>
+                    </p>
+                </div>
             </div>
 
-            <nav className="flex-1 p-4 space-y-2">
-                <Link
-                    href="/"
-                    className={`flex items-center space-x-3 p-3 rounded-md transition-colors ${pathname === '/' ? 'bg-[#121212] text-[#FFE600] border border-[#FFE600]/30' : 'hover:bg-[#121212] text-[#FFE600] opacity-70 hover:opacity-100'
-                        }`}
-                >
-                    <Home size={20} />
-                    <span>Dashboard</span>
-                </Link>
+            <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                {navItems.map((item, idx) => {
+                    if (!item.roles.includes(user.role)) return null;
+                    const active = isActive(item.href);
 
-                {(user.role === 'admin' || user.role === 'operador') && (
-                    <Link
-                        href="/sessions"
-                        className={`flex items-center space-x-3 p-3 rounded-md transition-colors ${pathname === '/sessions' ? 'bg-[#121212] text-[#FFE600] border border-[#FFE600]/30' : 'hover:bg-[#121212] text-[#FFE600] opacity-70 hover:opacity-100'
-                            }`}
-                    >
-                        <Users size={20} />
-                        <span>Sessões</span>
-                    </Link>
-                )}
-
-                {(user.role === 'admin' || user.role === 'operador') && (
-                    <Link
-                        href="/vendedores"
-                        className={`flex items-center space-x-3 p-3 rounded-md transition-colors ${pathname === '/vendedores' ? 'bg-[#121212] text-[#FFE600] border border-[#FFE600]/30' : 'hover:bg-[#121212] text-[#FFE600] opacity-70 hover:opacity-100'
-                            }`}
-                    >
-                        <Users size={20} />
-                        <span>Vendedores</span>
-                    </Link>
-                )}
-
-                {user.role === 'admin' && (
-                    <Link
-                        href="/reports"
-                        className={`flex items-center space-x-3 p-3 rounded-md transition-colors ${pathname === '/reports' ? 'bg-[#121212] text-[#FFE600] border border-[#FFE600]/30' : 'hover:bg-[#121212] text-[#FFE600] opacity-70 hover:opacity-100'
-                            }`}
-                    >
-                        <FileText size={20} />
-                        <span>Relatórios</span>
-                    </Link>
-                )}
-
-                {(user.role === 'vendedor') && (
-                    <Link
-                        href="/meu-relatorio"
-                        className={`flex items-center space-x-3 p-3 rounded-md transition-colors ${pathname === '/meu-relatorio' ? 'bg-[#121212] text-[#FFE600] border border-[#FFE600]/30' : 'hover:bg-[#121212] text-[#FFE600] opacity-70 hover:opacity-100'
-                            }`}
-                    >
-                        <FileText size={20} />
-                        <span>Meu Relatório</span>
-                    </Link>
-                )}
-
-                {(user.role === 'admin' || user.role === 'vendedor') && (
-                    <Link
-                        href="/messages"
-                        className={`flex items-center space-x-3 p-3 rounded-md transition-colors ${pathname === '/messages' ? 'bg-[#121212] text-[#FFE600] border border-[#FFE600]/30' : 'hover:bg-[#121212] text-[#FFE600] opacity-70 hover:opacity-100'
-                            }`}
-                    >
-                        <Send size={20} />
-                        <span>Enviar Mensagem</span>
-                    </Link>
-                )}
-
-                {user.role === 'admin' && (
-                    <Link
-                        href="/users"
-                        className={`flex items-center space-x-3 p-3 rounded-md transition-colors ${pathname === '/users' ? 'bg-[#121212] text-[#FFE600] border border-[#FFE600]/30' : 'hover:bg-[#121212] text-[#FFE600] opacity-70 hover:opacity-100'
-                            }`}
-                    >
-                        <Users size={20} />
-                        <span>Controle Usuários</span>
-                    </Link>
-                )}
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${active
+                                ? 'bg-[var(--surface-highlight)] text-[var(--primary)] font-medium border-l-2 border-[var(--primary)] pl-[10px] shadow-[inset_3px_0_8px_rgba(212,175,55,0.15)]'
+                                : 'hover:bg-[var(--surface-highlight)] hover:text-[var(--foreground)] hover:translate-x-1'
+                                }`}
+                            style={{ animation: `slide-in-left 300ms ease-out ${idx * 50}ms both` }}
+                        >
+                            <item.icon size={18} className={`transition-all duration-200 ${active ? 'text-[var(--primary)]' : 'text-[var(--muted)] group-hover:text-[var(--foreground)] group-hover:scale-110'}`} />
+                            <span>{item.label}</span>
+                        </Link>
+                    );
+                })}
             </nav>
 
-            <div className="p-4 border-t border-gray-800">
+            <div className="p-4 border-t border-[var(--border)] bg-[var(--surface)]">
                 <button
                     onClick={logout}
-                    className="flex items-center space-x-3 text-red-400 hover:text-red-300 w-full p-2 transition-colors"
+                    className="flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg text-red-500 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group"
                 >
-                    <LogOut size={20} />
-                    <span>Sair</span>
+                    <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
+                    <span className="font-medium">Sair da Conta</span>
                 </button>
             </div>
         </div>

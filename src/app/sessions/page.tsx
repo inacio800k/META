@@ -126,8 +126,11 @@ export default function SessionsPage() {
 
     if (authLoading || loading) {
         return (
-            <div className="flex h-screen bg-[#121212] text-[#FFE600] items-center justify-center">
-                <div className="text-xl">Carregando...</div>
+            <div className="flex h-screen bg-[var(--background)] items-center justify-center">
+                <div className="flex flex-col items-center space-y-4">
+                    <div className="skeleton h-4 w-48"></div>
+                    <div className="skeleton h-3 w-32"></div>
+                </div>
             </div>
         );
     }
@@ -162,7 +165,7 @@ export default function SessionsPage() {
                                     setSelectedVendorId('');
                                     setIsAssignModalOpen(true);
                                 }}
-                                className="text-[#FFE600] underline hover:text-white text-xs"
+                                className="text-[var(--primary)] underline hover:text-[var(--foreground)] text-xs cursor-pointer"
                             >
                                 Atribuir
                             </button>
@@ -236,16 +239,20 @@ export default function SessionsPage() {
     };
 
     return (
-        <div className="flex h-screen bg-[#121212] text-[#FFE600]">
+        <div className="flex bg-[var(--background)] min-h-screen">
             <Sidebar />
             <main className="flex-1 ml-64 p-8 overflow-y-auto">
                 <header className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold neon-text">Sessões Ativas</h1>
+                    <div>
+                        <h1 className="text-3xl font-bold gold-gradient tracking-tight">Sessões Ativas</h1>
+                        <p className="text-[var(--muted)] mt-1">Gerencie as sessões de atendimento.</p>
+                    </div>
 
                     {hasRole(['admin', 'operador']) && (
                         <button
                             onClick={() => setIsAddModalOpen(true)}
-                            className="flex items-center space-x-2 bg-yellow-600/20 border border-[#FFE600] text-[#FFE600] px-4 py-2 rounded-md hover:bg-yellow-600/40 transition"
+                            className="flex items-center space-x-2 px-5 py-2.5 rounded-lg cursor-pointer font-bold"
+                            style={{ background: 'linear-gradient(145deg, #92700C 0%, #BF9B30 15%, #DBCA6E 35%, #FFEC8A 50%, #DBCA6E 65%, #BF9B30 85%, #92700C 100%)', color: '#1A1200', border: '1px solid rgba(255,236,138,0.3)', boxShadow: '0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,250,220,0.4), inset 0 -1px 0 rgba(146,112,12,0.3)', textShadow: '0 1px 0 rgba(255,250,220,0.3)' }}
                         >
                             <Plus size={20} />
                             <span>Adicionar Sessão</span>
@@ -253,7 +260,7 @@ export default function SessionsPage() {
                     )}
                 </header>
 
-                <div className="bg-[#1E1E1E] rounded-lg shadow-lg border border-[#333] p-6">
+                <div className="bg-[var(--surface)] rounded-xl shadow-lg border border-[var(--border)] p-6">
                     <DataTable
                         data={sessions}
                         columns={columns}
@@ -267,25 +274,24 @@ export default function SessionsPage() {
                     title="Criar Nova Sessão"
                     className="max-w-4xl"
                 >
-                    <form onSubmit={handleAddSession} className="space-y-4 max-h-[80vh] overflow-y-auto px-1" autoComplete="off">
-
+                    <form onSubmit={handleAddSession} className="space-y-4 max-h-[80vh] overflow-y-auto px-1 custom-scrollbar" autoComplete="off">
                         <div>
-                            <label className="block text-sm font-medium text-[#FFE600]">Sessão</label>
+                            <label className="block text-sm font-medium text-[var(--muted)]">Sessão</label>
                             <input
                                 name="sessao"
                                 type="text"
                                 required
                                 autoComplete="off"
-                                className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                 value={formData.sessao}
                                 onChange={handleInputChange}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-[#FFE600]">Origem Atendimento</label>
+                            <label className="block text-sm font-medium text-[var(--muted)]">Origem Atendimento</label>
                             <select
                                 name="origem_atendimento"
-                                className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border"
+                                className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all"
                                 value={formData.origem_atendimento}
                                 onChange={handleInputChange}
                             >
@@ -295,63 +301,63 @@ export default function SessionsPage() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">Tipo Atendimento</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">Tipo Atendimento</label>
                                 <input
                                     name="tipo_atendimento"
                                     type="text"
                                     required
                                     autoComplete="off"
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                     value={formData.tipo_atendimento}
                                     onChange={handleInputChange}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">Nome Atendente</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">Nome Atendente</label>
                                 <input
                                     name="nome_atendente"
                                     type="text"
                                     required
                                     autoComplete="off"
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                     value={formData.nome_atendente}
                                     onChange={handleInputChange}
                                 />
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-[#FFE600]">Nome do Aplicativo</label>
+                            <label className="block text-sm font-medium text-[var(--muted)]">Nome do Aplicativo</label>
                             <input
                                 name="nome_app"
                                 type="text"
                                 required
                                 autoComplete="off"
-                                className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                 value={formData.nome_app}
                                 onChange={handleInputChange}
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">Número</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">Número</label>
                                 <input
                                     name="numero"
                                     type="text"
                                     required
                                     autoComplete="off"
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                     value={formData.numero}
                                     onChange={handleInputChange}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">ID Número</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">ID Número</label>
                                 <input
                                     name="id_numero"
                                     type="text"
                                     required
                                     autoComplete="off"
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                     value={formData.id_numero}
                                     onChange={handleInputChange}
                                 />
@@ -359,38 +365,38 @@ export default function SessionsPage() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">ID Business</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">ID Business</label>
                                 <input
                                     name="id_business"
                                     type="text"
                                     required
                                     autoComplete="off"
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                     value={formData.id_business}
                                     onChange={handleInputChange}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">ID Aplicativo</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">ID Aplicativo</label>
                                 <input
                                     name="id_aplicativo"
                                     type="text"
                                     required
                                     autoComplete="off"
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                     value={formData.id_aplicativo}
                                     onChange={handleInputChange}
                                 />
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-[#FFE600]">Token Permanente</label>
+                            <label className="block text-sm font-medium text-[var(--muted)]">Token Permanente</label>
                             <input
                                 name="token_permanente"
                                 type="text"
                                 required
                                 autoComplete="off"
-                                className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                 value={formData.token_permanente}
                                 onChange={handleInputChange}
                             />
@@ -399,13 +405,13 @@ export default function SessionsPage() {
                             <button
                                 type="button"
                                 onClick={() => setIsAddModalOpen(false)}
-                                className="px-4 py-2 border border-[#FFE600] rounded-md text-sm font-medium text-[#FFE600] hover:bg-yellow-600/20"
+                                className="px-4 py-2 border border-[var(--border)] rounded-lg text-sm font-medium text-[var(--muted)] hover:bg-[var(--surface-highlight)] transition-colors"
                             >
                                 Cancelar
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 border border-[#FFE600] rounded-md shadow-sm text-sm font-medium text-[#FFE600] bg-yellow-600/20 hover:bg-yellow-600/40"
+                                className="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-bold text-black bg-[var(--primary)] hover:bg-[var(--primary-hover)] transition-all"
                             >
                                 Salvar
                             </button>
@@ -419,24 +425,24 @@ export default function SessionsPage() {
                     title="Editar Sessão"
                     className="max-w-4xl"
                 >
-                    <form onSubmit={handleEditSession} className="space-y-4 max-h-[80vh] overflow-y-auto px-1" autoComplete="off">
+                    <form onSubmit={handleEditSession} className="space-y-4 max-h-[80vh] overflow-y-auto px-1 custom-scrollbar" autoComplete="off">
                         <div>
-                            <label className="block text-sm font-medium text-[#FFE600]">Sessão</label>
+                            <label className="block text-sm font-medium text-[var(--muted)]">Sessão</label>
                             <input
                                 name="sessao"
                                 type="text"
                                 required
                                 autoComplete="off"
-                                className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                 value={editingSession.sessao || ''}
                                 onChange={handleEditInputChange}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-[#FFE600]">Origem Atendimento</label>
+                            <label className="block text-sm font-medium text-[var(--muted)]">Origem Atendimento</label>
                             <select
                                 name="origem_atendimento"
-                                className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border"
+                                className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all"
                                 value={editingSession.origem_atendimento || ''}
                                 onChange={handleEditInputChange}
                             >
@@ -446,63 +452,63 @@ export default function SessionsPage() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">Tipo Atendimento</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">Tipo Atendimento</label>
                                 <input
                                     name="tipo_atendimento"
                                     type="text"
                                     required
                                     autoComplete="off"
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                     value={editingSession.tipo_atendimento || ''}
                                     onChange={handleEditInputChange}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">Nome Atendente</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">Nome Atendente</label>
                                 <input
                                     name="nome_atendente"
                                     type="text"
                                     required
                                     autoComplete="off"
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                     value={editingSession.nome_atendente || ''}
                                     onChange={handleEditInputChange}
                                 />
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-[#FFE600]">Nome do Aplicativo</label>
+                            <label className="block text-sm font-medium text-[var(--muted)]">Nome do Aplicativo</label>
                             <input
                                 name="nome_app"
                                 type="text"
                                 required
                                 autoComplete="off"
-                                className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                 value={editingSession.nome_app || ''}
                                 onChange={handleEditInputChange}
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">Número</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">Número</label>
                                 <input
                                     name="numero"
                                     type="text"
                                     required
                                     autoComplete="off"
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                     value={editingSession.numero || ''}
                                     onChange={handleEditInputChange}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">ID Número</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">ID Número</label>
                                 <input
                                     name="id_numero"
                                     type="text"
                                     required
                                     autoComplete="off"
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                     value={editingSession.id_numero || ''}
                                     onChange={handleEditInputChange}
                                 />
@@ -510,38 +516,38 @@ export default function SessionsPage() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">ID Business</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">ID Business</label>
                                 <input
                                     name="id_business"
                                     type="text"
                                     required
                                     autoComplete="off"
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                     value={editingSession.id_business || ''}
                                     onChange={handleEditInputChange}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">ID Aplicativo</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">ID Aplicativo</label>
                                 <input
                                     name="id_aplicativo"
                                     type="text"
                                     required
                                     autoComplete="off"
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                     value={editingSession.id_aplicativo || ''}
                                     onChange={handleEditInputChange}
                                 />
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-[#FFE600]">Token Permanente</label>
+                            <label className="block text-sm font-medium text-[var(--muted)]">Token Permanente</label>
                             <input
                                 name="token_permanente"
                                 type="text"
                                 required
                                 autoComplete="off"
-                                className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all placeholder-[var(--muted)]"
                                 value={editingSession.token_permanente || ''}
                                 onChange={handleEditInputChange}
                             />
@@ -550,13 +556,13 @@ export default function SessionsPage() {
                             <button
                                 type="button"
                                 onClick={() => setIsEditModalOpen(false)}
-                                className="px-4 py-2 border border-[#FFE600] rounded-md text-sm font-medium text-[#FFE600] hover:bg-yellow-600/20"
+                                className="px-4 py-2 border border-[var(--border)] rounded-lg text-sm font-medium text-[var(--muted)] hover:bg-[var(--surface-highlight)] transition-colors"
                             >
                                 Cancelar
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 border border-[#FFE600] rounded-md shadow-sm text-sm font-medium text-[#FFE600] bg-yellow-600/20 hover:bg-yellow-600/40"
+                                className="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-bold text-black bg-[var(--primary)] hover:bg-[var(--primary-hover)] transition-all"
                             >
                                 Salvar
                             </button>
@@ -571,10 +577,10 @@ export default function SessionsPage() {
                 >
                     <form onSubmit={handleAssignVendor} className="space-y-4">
                         <div>
-                            <p className="text-sm text-[#FFE600] mb-2">Sessão: {selectedSession?.sessao}</p>
-                            <label className="block text-sm font-medium text-[#FFE600]">Selecione o Vendedor</label>
+                            <p className="text-sm text-[var(--foreground)] mb-2">Sessão: {selectedSession?.sessao}</p>
+                            <label className="block text-sm font-medium text-[var(--muted)]">Selecione o Vendedor</label>
                             <select
-                                className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border"
+                                className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 transition-all"
                                 value={selectedVendorId}
                                 onChange={(e) => setSelectedVendorId(e.target.value)}
                                 required
@@ -591,13 +597,13 @@ export default function SessionsPage() {
                             <button
                                 type="button"
                                 onClick={() => setIsAssignModalOpen(false)}
-                                className="px-4 py-2 border border-[#FFE600] rounded-md text-sm font-medium text-[#FFE600] hover:bg-yellow-600/20"
+                                className="px-4 py-2 border border-[var(--border)] rounded-lg text-sm font-medium text-[var(--muted)] hover:bg-[var(--surface-highlight)] transition-colors"
                             >
                                 Cancelar
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 border border-[#FFE600] rounded-md shadow-sm text-sm font-medium text-[#FFE600] bg-yellow-600/20 hover:bg-yellow-600/40"
+                                className="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-bold text-black bg-[var(--primary)] hover:bg-[var(--primary-hover)] transition-all"
                             >
                                 Salvar
                             </button>

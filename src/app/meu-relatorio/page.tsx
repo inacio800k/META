@@ -67,8 +67,11 @@ export default function MeuRelatorioPage() {
 
     if (authLoading || loading) {
         return (
-            <div className="flex h-screen bg-[#121212] text-[#FFE600] items-center justify-center">
-                <div className="text-xl">Carregando...</div>
+            <div className="flex h-screen bg-[var(--background)] items-center justify-center">
+                <div className="flex flex-col items-center space-y-4">
+                    <div className="skeleton h-4 w-48"></div>
+                    <div className="skeleton h-3 w-32"></div>
+                </div>
             </div>
         );
     }
@@ -76,19 +79,19 @@ export default function MeuRelatorioPage() {
     if (!hasRole(['vendedor'])) return null;
 
     return (
-        <div className="flex h-screen bg-[#121212] text-[#FFE600] overflow-hidden">
+        <div className="flex bg-[var(--background)] min-h-screen overflow-hidden">
             <Sidebar />
             <main className="flex-1 ml-64 h-full overflow-y-auto p-8 pb-12">
                 <header className="mb-8">
-                    <h1 className="text-3xl font-bold neon-text">Meu Relatório</h1>
-                    <p className="text-[#FFE600] opacity-80">Visualizar meu desempenho</p>
+                    <h1 className="text-3xl font-bold tracking-tight" style={{ background: 'linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Meu Relatório</h1>
+                    <p className="text-[var(--muted)] mt-1">Visualizar meu desempenho</p>
                 </header>
 
-                <div className="bg-[#1E1E1E] rounded-lg shadow-lg border border-[#333] overflow-hidden">
+                <div className="bg-[var(--surface)] rounded-xl shadow-lg border border-[var(--border)] overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-[#2a2a2a] border-b border-[#333] text-[#FFE600] uppercase text-xs font-bold tracking-wider">
+                                <tr className="bg-[var(--surface-highlight)] border-b border-[var(--border)] text-[var(--muted)] uppercase text-xs font-semibold tracking-wider">
                                     <th className="p-4">ID Conversa</th>
                                     <th className="p-4">Cliente</th>
                                     <th className="p-4">Sessão</th>
@@ -98,37 +101,37 @@ export default function MeuRelatorioPage() {
                                     <th className="p-4">Atendente</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#333]">
+                            <tbody className="divide-y divide-[var(--border)]">
                                 {reportData.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="p-8 text-center text-gray-500">
+                                        <td colSpan={7} className="p-8 text-center text-[var(--muted)] italic">
                                             Nenhum registro encontrado.
                                         </td>
                                     </tr>
                                 ) : (
                                     reportData.map((item, index) => (
-                                        <tr key={index} className="hover:bg-[#252525] transition-colors text-sm">
+                                        <tr key={index} className="hover:bg-[var(--surface-highlight)] transition-colors text-sm group">
                                             <td className="p-4">
                                                 {item.link_conversa ? (
                                                     <a
                                                         href={item.link_conversa}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="neon-text hover:underline flex items-center gap-1 font-bold"
+                                                        className="text-[var(--primary)] hover:underline flex items-center gap-1 font-bold"
                                                     >
                                                         {item.id_conversa}
                                                         <ExternalLink size={12} />
                                                     </a>
                                                 ) : (
-                                                    <span className="neon-text font-bold">{item.id_conversa || '-'}</span>
+                                                    <span className="text-[var(--primary)] font-bold">{item.id_conversa || '-'}</span>
                                                 )}
                                             </td>
-                                            <td className="p-4 opacity-90">{item.num_cliente || '-'}</td>
-                                            <td className="p-4 opacity-90">{item.sessao_disparo || '-'}</td>
-                                            <td className="p-4 opacity-80 font-mono text-xs">{item.hora_chamado ? new Date(item.hora_chamado).toLocaleString('pt-BR') : '-'}</td>
-                                            <td className="p-4 opacity-80 font-mono text-xs">{item.hora_visualizou ? new Date(item.hora_visualizou).toLocaleString('pt-BR') : '-'}</td>
-                                            <td className="p-4 opacity-80 font-mono text-xs">{item.hora_respondeu ? new Date(item.hora_respondeu).toLocaleString('pt-BR') : '-'}</td>
-                                            <td className="p-4 opacity-90">{item.nome_atendente || '-'}</td>
+                                            <td className="p-4 text-[var(--foreground)] opacity-90">{item.num_cliente || '-'}</td>
+                                            <td className="p-4 text-[var(--foreground)] opacity-90">{item.sessao_disparo || '-'}</td>
+                                            <td className="p-4 text-[var(--muted)] font-mono text-xs">{item.hora_chamado ? new Date(item.hora_chamado).toLocaleString('pt-BR') : '-'}</td>
+                                            <td className="p-4 text-[var(--muted)] font-mono text-xs">{item.hora_visualizou ? new Date(item.hora_visualizou).toLocaleString('pt-BR') : '-'}</td>
+                                            <td className="p-4 text-[var(--muted)] font-mono text-xs">{item.hora_respondeu ? new Date(item.hora_respondeu).toLocaleString('pt-BR') : '-'}</td>
+                                            <td className="p-4 text-[var(--foreground)] opacity-90">{item.nome_atendente || '-'}</td>
                                         </tr>
                                     ))
                                 )}

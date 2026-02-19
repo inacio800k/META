@@ -72,14 +72,17 @@ export default function ReportsPage() {
     ];
 
     return (
-        <div className="flex h-screen bg-[#121212] text-[#FFE600]">
+        <div className="flex bg-[var(--background)] min-h-screen">
             <Sidebar />
             <main className="flex-1 ml-64 p-8 overflow-y-auto">
                 <header className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold neon-text">Relatórios</h1>
+                    <div>
+                        <h1 className="text-3xl font-bold gold-gradient tracking-tight">Relatórios</h1>
+                        <p className="text-[var(--muted)] mt-1">Visualize o histórico de atendimentos.</p>
+                    </div>
                 </header>
 
-                <div className="bg-[#1E1E1E] rounded-lg shadow-lg border border-[#333] p-6">
+                <div className="bg-[var(--surface)] rounded-xl shadow-lg border border-[var(--border)] p-6">
                     <DataTable
                         data={reports}
                         columns={columns}

@@ -47,9 +47,9 @@ export const RegisterNumberModal: React.FC<RegisterNumberModalProps> = ({ isOpen
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Registrar Número">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                    <label htmlFor="id_numero" className="block text-sm font-medium text-[#FFE600] mb-1">
+                    <label htmlFor="id_numero" className="block text-sm font-medium text-[var(--muted)] mb-1">
                         ID Número
                     </label>
                     <input
@@ -57,13 +57,13 @@ export const RegisterNumberModal: React.FC<RegisterNumberModalProps> = ({ isOpen
                         id="id_numero"
                         value={idNumero}
                         onChange={(e) => setIdNumero(e.target.value)}
-                        className="w-full bg-[#121212] border border-[#333] rounded-md p-2 text-white focus:outline-none focus:border-[#FFE600]"
+                        className="w-full bg-[var(--surface-highlight)] border border-[var(--border)] rounded-lg p-2.5 text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] transition-all placeholder-[var(--muted)]"
                         placeholder="Digite o ID do número"
                         required
                     />
                 </div>
                 <div>
-                    <label htmlFor="token_temp" className="block text-sm font-medium text-[#FFE600] mb-1">
+                    <label htmlFor="token_temp" className="block text-sm font-medium text-[var(--muted)] mb-1">
                         Token Temporário
                     </label>
                     <input
@@ -71,16 +71,17 @@ export const RegisterNumberModal: React.FC<RegisterNumberModalProps> = ({ isOpen
                         id="token_temp"
                         value={tokenTemp}
                         onChange={(e) => setTokenTemp(e.target.value)}
-                        className="w-full bg-[#121212] border border-[#333] rounded-md p-2 text-white focus:outline-none focus:border-[#FFE600]"
+                        className="w-full bg-[var(--surface-highlight)] border border-[var(--border)] rounded-lg p-2.5 text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] transition-all placeholder-[var(--muted)]"
                         placeholder="Digite o token temporário"
                         required
                     />
                 </div>
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end pt-2">
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className={`bg-[#FFE600] text-black font-bold py-2 px-4 rounded-md hover:bg-[#FFE600]/80 transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`py-2.5 px-6 rounded-lg cursor-pointer font-bold ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        style={{ background: 'linear-gradient(145deg, #92700C 0%, #BF9B30 15%, #DBCA6E 35%, #FFEC8A 50%, #DBCA6E 65%, #BF9B30 85%, #92700C 100%)', color: '#1A1200', border: '1px solid rgba(255,236,138,0.3)', boxShadow: '0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,250,220,0.4), inset 0 -1px 0 rgba(146,112,12,0.3)', textShadow: '0 1px 0 rgba(255,250,220,0.3)' }}
                     >
                         {isLoading ? 'Registrando...' : 'Confirmar'}
                     </button>

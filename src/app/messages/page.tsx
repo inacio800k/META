@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { usePermission } from '@/hooks/usePermission';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { dataService } from '@/services/dataService';
-import { Send } from 'lucide-react';
+import { Send, MessageSquare, Eye, Tag, Hash, FileText, ChevronDown, Check } from 'lucide-react';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -28,6 +28,22 @@ export default function MessagesPage() {
     const [demanda, setDemanda] = useState('');
     const [numeroCliente, setNumeroCliente] = useState('');
 
+    const templateDropdownRef = useRef<HTMLDivElement>(null);
+    const tagsDropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (templateDropdownRef.current && !templateDropdownRef.current.contains(e.target as Node)) {
+                setIsTemplateMenuOpen(false);
+            }
+            if (tagsDropdownRef.current && !tagsDropdownRef.current.contains(e.target as Node)) {
+                setIsTagsMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     useEffect(() => {
         if (!authLoading && !hasRole(['admin', 'vendedor'])) {
             router.push('/');
@@ -43,7 +59,6 @@ export default function MessagesPage() {
                     let tagList: any[] = [];
 
                     if (Array.isArray(data)) {
-                        // Find sessions object
                         const sessoesObj = data.find((item: any) => item && item.sessoes);
                         if (sessoesObj) {
                             sessionList = sessoesObj.sessoes;
@@ -53,13 +68,10 @@ export default function MessagesPage() {
                                 sessionList = data;
                             }
                         }
-
-                        // Find tags object
                         const tagsObj = data.find((item: any) => item && item.tags);
                         if (tagsObj && Array.isArray(tagsObj.tags)) {
                             tagList = tagsObj.tags;
                         }
-
                     } else if (data) {
                         if (data.sessoes) sessionList = data.sessoes;
                         if (data.tags && Array.isArray(data.tags)) tagList = data.tags;
@@ -71,7 +83,6 @@ export default function MessagesPage() {
                         console.warn('Unexpected session data format:', data);
                         setSessions([]);
                     }
-
                     if (Array.isArray(tagList)) {
                         setTags(tagList);
                     }
@@ -91,19 +102,11 @@ export default function MessagesPage() {
         if (newValue && user) {
             dataService.selectSession({ sessao: newValue, user })
                 .then(response => {
-                    // Expecting response to contain templates array
-                    // Check for various possible response structures
-
-                    // Case: [{ templates: [...] }] - n8n often returns an array of items
                     if (Array.isArray(response) && response.length > 0 && response[0]?.templates && Array.isArray(response[0].templates)) {
                         setTemplates(response[0].templates);
-                    }
-                    // Case: { templates: [...] }
-                    else if (response && Array.isArray(response.templates)) {
+                    } else if (response && Array.isArray(response.templates)) {
                         setTemplates(response.templates);
-                    }
-                    // Case: [...] (direct array of templates)
-                    else if (Array.isArray(response)) {
+                    } else if (Array.isArray(response)) {
                         setTemplates(response);
                     } else {
                         console.warn('Unexpected template response format', response);
@@ -133,29 +136,22 @@ export default function MessagesPage() {
         e.preventDefault();
         if (!selectedSession || !selectedTemplate) return;
 
-
-
         setLoading(true);
         try {
             let finalMessage = selectedTemplate.texto;
-            // Interpolate variables
             if (selectedTemplate.variaveis && Array.isArray(selectedTemplate.variaveis)) {
                 selectedTemplate.variaveis.forEach((variable: string) => {
                     const value = variableValues[variable] || '';
-                    // Replace {{variable}} with value
                     finalMessage = finalMessage.replace(new RegExp(`{{${variable}}}`, 'g'), value);
                 });
             }
 
-            // Find full session object
             const sessionData = sessions.find(s => (s.sessao || s.id) === selectedSession);
 
-            // Construct variables array
             const variablesArray = Object.entries(variableValues).map(([key, value]) => ({
                 [key]: value
             }));
 
-            // Construct mensagem_completa with buttons
             let mensagem_completa = finalMessage;
             if (selectedTemplate.botoes && Array.isArray(selectedTemplate.botoes) && selectedTemplate.botoes.length > 0) {
                 mensagem_completa += '\n\n' + selectedTemplate.botoes.join('\n');
@@ -195,305 +191,366 @@ export default function MessagesPage() {
 
     if (authLoading) {
         return (
-            <div className="flex h-screen bg-[#121212] text-[#FFE600] items-center justify-center">
-                <div className="text-xl">Carregando...</div>
+            <div className="flex h-screen bg-[var(--background)] items-center justify-center">
+                <div className="flex flex-col items-center space-y-4">
+                    <div className="skeleton h-4 w-48"></div>
+                    <div className="skeleton h-3 w-32"></div>
+                </div>
             </div>
         );
     }
 
     if (!hasRole(['admin', 'vendedor'])) return null;
 
+    const goldGradientStyle = { background: 'linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent', backgroundClip: 'text' as const };
+    const silverGradientStyle = { background: 'linear-gradient(135deg, #7C7E83 0%, #C8CACF 25%, #8A8D93 50%, #D8DAE0 75%, #6E7074 100%)', WebkitBackgroundClip: 'text' as const, WebkitTextFillColor: 'transparent', backgroundClip: 'text' as const };
+    const silverText = '#A8ABB2';
+    const silverTextLight = '#BEC1C8';
+
     return (
-        <div className="flex h-screen bg-[#121212] text-[#FFE600] overflow-hidden">
+        <div className="flex bg-[var(--background)] min-h-screen overflow-hidden">
             <Sidebar />
             <main className="flex-1 ml-64 h-full overflow-y-auto p-8 pb-12">
-                <header className="mb-8">
-                    <h1 className="text-3xl font-bold neon-text">Enviar Mensagem</h1>
-                    <p className="text-[#FFE600] opacity-80">Selecione uma sessão e um template para enviar.</p>
+                {/* Header */}
+                <header className="mb-10">
+                    <div className="flex items-center space-x-3 mb-1">
+                        <div className="p-2 rounded-lg" style={{ background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)' }}>
+                            <Send size={22} style={{ color: '#D4AF37' }} />
+                        </div>
+                        <h1 className="text-3xl font-bold tracking-tight" style={goldGradientStyle}>Enviar Mensagem</h1>
+                    </div>
+                    <p className="text-[var(--muted)] mt-2 ml-12">Selecione uma sessão, template e configure o envio.</p>
                 </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl">
-                    <div className="bg-[#1E1E1E] rounded-lg shadow-lg border border-[#333] p-6 max-w-2xl min-h-[400px]">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-[1400px]">
+                    {/* Left Column - Form (3 cols) */}
+                    <div className="lg:col-span-3 space-y-6">
                         <form onSubmit={handleSendMessage} className="space-y-6">
-                            <div>
-                                <label className="block text-sm font-medium text-[#FFE600] mb-2">
-                                    Selecione a Sessão
-                                </label>
-                                <select
-                                    required
-                                    className="w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-3 border"
-                                    value={selectedSession}
-                                    onChange={handleSessionChange}
-                                >
-                                    <option value="">Selecione...</option>
-                                    {sessions.map((session, index) => (
-                                        <option key={session.id || index} value={session.sessao || session.id}>
-                                            {session.sessao || `Sessão ${session.id}` || 'Sessão sem nome'}
-                                        </option>
-                                    ))}
-                                </select>
+                            {/* Step 1: Sessão */}
+                            <div className="premium-card rounded-xl p-6 relative" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
+                                <div className="flex items-center space-x-3 mb-4">
+                                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'linear-gradient(135deg, #BF953F, #D4AF37)', color: '#1A1200' }}>1</div>
+                                    <h3 className="text-sm font-bold uppercase tracking-wider" style={silverGradientStyle}>Sessão</h3>
+                                </div>
+                                <div className="relative">
+                                    <select
+                                        required
+                                        className="w-full rounded-lg bg-[var(--background)] p-3.5 pr-10 border border-[var(--border)] transition-all text-sm focus:outline-none appearance-none cursor-pointer"
+                                        style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)', color: silverTextLight }}
+                                        value={selectedSession}
+                                        onChange={handleSessionChange}
+                                    >
+                                        <option value="">Selecione uma sessão...</option>
+                                        {sessions.map((session, index) => (
+                                            <option key={session.id || index} value={session.sessao || session.id}>
+                                                {session.sessao || `Sessão ${session.id}` || 'Sessão sem nome'}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none" />
+                                </div>
                             </div>
 
-                            {/* Custom Template Select */}
+                            {/* Step 2: Template */}
                             {selectedSession && (
-                                <div className="relative">
-                                    <label className="block text-sm font-medium text-[#FFE600] mb-2">
-                                        Selecione o Template
-                                    </label>
-
-                                    {/* Selected Value Display (Closed State) */}
-                                    <div
-                                        className="w-full rounded-md border border-[#333] bg-[#121212] text-[#FFE600] p-3 cursor-pointer flex justify-between items-center"
-                                        onClick={() => setIsTemplateMenuOpen(!isTemplateMenuOpen)}
-                                    >
-                                        <span>{selectedTemplate ? selectedTemplate.nome : 'Selecione um template...'}</span>
-                                        <span className="text-xs opacity-50">▼</span>
+                                <div className="premium-card rounded-xl p-6 relative z-30 animate-fade-in" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
+                                    <div className="flex items-center space-x-3 mb-4">
+                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'linear-gradient(135deg, #BF953F, #D4AF37)', color: '#1A1200' }}>2</div>
+                                        <h3 className="text-sm font-bold uppercase tracking-wider" style={silverGradientStyle}>Template</h3>
+                                        <span className="text-xs text-[var(--muted)] ml-auto">{templates.length} disponíveis</span>
                                     </div>
 
-                                    {/* Dropdown Menu (Open State) */}
-                                    {isTemplateMenuOpen && (
-                                        <div className="absolute z-10 w-full mt-1 bg-[#1E1E1E] border border-[#333] rounded-md shadow-xl max-h-96 overflow-y-auto">
-                                            {templates.length === 0 ? (
-                                                <div className="p-4 text-center opacity-50">Nenhum template disponível</div>
-                                            ) : (
-                                                templates.map((template, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="p-4 border-b border-[#333] hover:bg-yellow-900/20 cursor-pointer transition-colors"
-                                                        onClick={() => {
-                                                            setSelectedTemplate(template);
-                                                            setVariableValues({});
-                                                            setIsTemplateMenuOpen(false);
-                                                        }}
-                                                    >
-                                                        <div className="font-bold text-[#FFE600] mb-1">
-                                                            {template.nome}
-                                                        </div>
-                                                        <div className="text-sm opacity-80 whitespace-pre-wrap leading-relaxed">
-                                                            {template.texto}
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Variable Inputs */}
-                            {selectedTemplate && selectedTemplate.variaveis && Array.isArray(selectedTemplate.variaveis) && selectedTemplate.variaveis.length > 0 && (
-                                <div className="space-y-4 p-4 border border-[#333] rounded-md bg-yellow-900/10">
-                                    <h3 className="text-sm font-bold text-[#FFE600] opacity-90">Preencha as variáveis:</h3>
-                                    {selectedTemplate.variaveis.map((variable: string, index: number) => (
-                                        <div key={index}>
-                                            <label className="block text-xs font-medium text-[#FFE600] mb-1 opacity-80 capitalize">
-                                                {variable.replace(/_/g, ' ')}
-                                            </label>
-                                            <input
-                                                type="text"
-                                                required
-                                                className="w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
-                                                value={variableValues[variable] || ''}
-                                                onChange={(e) => handleVariableChange(variable, e.target.value)}
-                                                placeholder={`Valor para ${variable}`}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Tags, Demanda, and Client Number */}
-                            {selectedSession && (
-                                <div className="space-y-6 pt-4 border-t border-[#333]">
-                                    {/* Tags Select */}
-                                    <div className="relative">
-                                        <label className="block text-sm font-medium text-[#FFE600] mb-2">
-                                            Selecione as Tags
-                                        </label>
+                                    <div className="relative" ref={templateDropdownRef}>
                                         <div
-                                            className="w-full rounded-md border border-[#333] bg-[#121212] text-[#FFE600] p-3 cursor-pointer flex justify-between items-center"
-                                            onClick={() => {
-                                                setIsTagsMenuOpen(!isTagsMenuOpen);
-                                                setIsTemplateMenuOpen(false);
-                                            }}
+                                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] p-3.5 cursor-pointer flex justify-between items-center hover:border-[var(--primary)] transition-all"
+                                            style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)', color: silverTextLight }}
+                                            onClick={() => setIsTemplateMenuOpen(!isTemplateMenuOpen)}
                                         >
-                                            <span className="truncate">
-                                                {selectedTags.length > 0
-                                                    ? `${selectedTags.length} tags selecionadas`
-                                                    : 'Selecione as tags...'}
+                                            <span style={{ color: selectedTemplate ? silverTextLight : 'var(--muted)' }}>
+                                                {selectedTemplate ? selectedTemplate.nome : 'Selecione um template...'}
                                             </span>
-                                            <span className="text-xs opacity-50">▼</span>
+                                            <ChevronDown size={16} className={`text-[var(--muted)] transition-transform ${isTemplateMenuOpen ? 'rotate-180' : ''}`} />
                                         </div>
 
-                                        {isTagsMenuOpen && (
-                                            <div className="absolute z-10 w-full mt-1 bg-[#1E1E1E] border border-[#333] rounded-md shadow-xl max-h-60 overflow-y-auto">
-                                                {tags.length === 0 ? (
-                                                    <div className="p-4 text-center opacity-50 text-sm text-[#FFE600]">Nenhuma tag disponível</div>
+                                        {isTemplateMenuOpen && (
+                                            <div className="absolute z-50 w-full mt-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl max-h-96 overflow-y-auto custom-scrollbar" style={{ boxShadow: '0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.1)' }}>
+                                                {templates.length === 0 ? (
+                                                    <div className="p-6 text-center text-[var(--muted)] text-sm">Nenhum template disponível</div>
                                                 ) : (
-                                                    tags.map((tag, index) => (
+                                                    templates.map((template, index) => (
                                                         <div
                                                             key={index}
-                                                            className="flex items-center p-3 hover:bg-yellow-900/20 cursor-pointer border-b border-[#333] last:border-0"
-                                                            onClick={() => handleTagToggle(tag)}
+                                                            className={`p-4 border-b border-[var(--border)] last:border-0 cursor-pointer transition-all hover:bg-[var(--surface-highlight)] ${selectedTemplate?.nome === template.nome ? 'bg-[var(--surface-highlight)]' : ''}`}
+                                                            style={selectedTemplate?.nome === template.nome ? { borderLeft: '3px solid #D4AF37' } : { borderLeft: '3px solid transparent' }}
+                                                            onClick={() => {
+                                                                setSelectedTemplate(template);
+                                                                setVariableValues({});
+                                                                setIsTemplateMenuOpen(false);
+                                                            }}
                                                         >
-                                                            <div className={`w-4 h-4 mr-3 rounded border border-[#FFE600] flex items-center justify-center ${selectedTags.includes(tag) ? 'bg-[#FFE600]' : ''}`}>
-                                                                {selectedTags.includes(tag) && <span className="text-black text-[10px] font-bold">✓</span>}
+                                                            <div className="flex items-center justify-between mb-1.5">
+                                                                <span className="font-bold text-sm" style={{ color: silverTextLight }}>{template.nome}</span>
+                                                                {selectedTemplate?.nome === template.nome && <Check size={14} style={{ color: '#D4AF37' }} />}
                                                             </div>
-                                                            <span className="text-sm text-[#FFE600]">{tag}</span>
+                                                            <div className="text-xs text-[var(--muted)] whitespace-pre-wrap leading-relaxed">{template.texto}</div>
                                                         </div>
                                                     ))
                                                 )}
                                             </div>
                                         )}
                                     </div>
+                                </div>
+                            )}
 
-                                    {/* Demanda Input */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-[#FFE600] mb-2">
-                                            Demanda
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-3 border placeholder-yellow-900/50"
-                                            value={demanda}
-                                            onChange={(e) => setDemanda(e.target.value)}
-                                            placeholder="Digite a demanda..."
-                                        />
+                            {/* Step 3: Variáveis */}
+                            {selectedTemplate && selectedTemplate.variaveis && Array.isArray(selectedTemplate.variaveis) && selectedTemplate.variaveis.length > 0 && (
+                                <div className="premium-card rounded-xl p-6 relative z-20 animate-fade-in" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
+                                    <div className="flex items-center space-x-3 mb-4">
+                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'linear-gradient(135deg, #BF953F, #D4AF37)', color: '#1A1200' }}>3</div>
+                                        <h3 className="text-sm font-bold uppercase tracking-wider" style={silverGradientStyle}>Variáveis</h3>
                                     </div>
-
-                                    {/* Numero Cliente Input */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-[#FFE600] mb-2">
-                                            Número Cliente
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-3 border placeholder-yellow-900/50"
-                                            value={numeroCliente}
-                                            onChange={(e) => setNumeroCliente(e.target.value)}
-                                            placeholder="Digite o número do cliente..."
-                                        />
+                                    <div className="space-y-4">
+                                        {selectedTemplate.variaveis.map((variable: string, index: number) => (
+                                            <div key={index}>
+                                                <label className="block text-xs font-bold text-[var(--muted)] mb-1.5 uppercase tracking-wider">
+                                                    {variable.replace(/_/g, ' ')}
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] p-3 text-sm placeholder-[var(--muted)] transition-all focus:outline-none"
+                                                    style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)', color: silverTextLight }}
+                                                    value={variableValues[variable] || ''}
+                                                    onChange={(e) => handleVariableChange(variable, e.target.value)}
+                                                    placeholder={`Valor para ${variable}`}
+                                                />
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             )}
 
-                            <div className="flex justify-end pt-4">
+                            {/* Step 4: Chatwoot / Tags / Demanda */}
+                            {selectedSession && (
+                                <div className="premium-card rounded-xl p-6 relative z-10 animate-fade-in" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
+                                    <div className="flex items-center space-x-3 mb-5">
+                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'linear-gradient(135deg, #BF953F, #D4AF37)', color: '#1A1200' }}>
+                                            {selectedTemplate?.variaveis?.length > 0 ? '4' : '3'}
+                                        </div>
+                                        <h3 className="text-sm font-bold uppercase tracking-wider" style={silverGradientStyle}>Chatwoot</h3>
+                                    </div>
+
+                                    <div className="space-y-5">
+                                        {/* Tags */}
+                                        <div className="relative" ref={tagsDropdownRef}>
+                                            <label className="flex items-center text-xs font-bold text-[var(--muted)] mb-2 uppercase tracking-wider">
+                                                <Tag size={12} className="mr-1.5" /> Tags
+                                            </label>
+                                            <div
+                                                className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] p-3.5 cursor-pointer flex justify-between items-center hover:border-[var(--primary)] transition-all"
+                                                style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)', color: silverTextLight }}
+                                                onClick={() => {
+                                                    setIsTagsMenuOpen(!isTagsMenuOpen);
+                                                    setIsTemplateMenuOpen(false);
+                                                }}
+                                            >
+                                                <span style={{ color: selectedTags.length > 0 ? silverTextLight : 'var(--muted)' }}>
+                                                    {selectedTags.length > 0
+                                                        ? `${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''} selecionada${selectedTags.length > 1 ? 's' : ''}`
+                                                        : 'Selecione as tags...'}
+                                                </span>
+                                                <ChevronDown size={16} className={`text-[var(--muted)] transition-transform ${isTagsMenuOpen ? 'rotate-180' : ''}`} />
+                                            </div>
+
+                                            {/* Selected tags display */}
+                                            {selectedTags.length > 0 && (
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {selectedTags.map(tag => (
+                                                        <span
+                                                            key={tag}
+                                                            className="px-2.5 py-1 rounded-full text-xs font-bold cursor-pointer transition-all hover:opacity-80"
+                                                            style={{ background: 'rgba(212,175,55,0.15)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.3)' }}
+                                                            onClick={() => handleTagToggle(tag)}
+                                                        >
+                                                            {tag} ✕
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {isTagsMenuOpen && (
+                                                <div className="absolute z-50 w-full mt-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl max-h-60 overflow-y-auto custom-scrollbar" style={{ boxShadow: '0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.1)' }}>
+                                                    {tags.length === 0 ? (
+                                                        <div className="p-4 text-center text-sm text-[var(--muted)]">Nenhuma tag disponível</div>
+                                                    ) : (
+                                                        tags.map((tag, index) => (
+                                                            <div
+                                                                key={index}
+                                                                className="flex items-center p-3 hover:bg-[var(--surface-highlight)] cursor-pointer border-b border-[var(--border)] last:border-0 transition-colors"
+                                                                onClick={() => handleTagToggle(tag)}
+                                                            >
+                                                                <div
+                                                                    className="w-4 h-4 mr-3 rounded flex items-center justify-center transition-all"
+                                                                    style={selectedTags.includes(tag) ? { background: 'linear-gradient(135deg, #BF953F, #D4AF37)', border: '1px solid #D4AF37' } : { border: '1px solid var(--muted)' }}
+                                                                >
+                                                                    {selectedTags.includes(tag) && <Check size={10} style={{ color: '#1A1200' }} strokeWidth={3} />}
+                                                                </div>
+                                                                <span className="text-sm" style={{ color: silverTextLight }}>{tag}</span>
+                                                            </div>
+                                                        ))
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Demanda & Numero */}
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="flex items-center text-xs font-bold text-[var(--muted)] mb-2 uppercase tracking-wider">
+                                                    <FileText size={12} className="mr-1.5" /> Demanda
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] p-3 text-sm placeholder-[var(--muted)] transition-all focus:outline-none"
+                                                    style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)', color: silverTextLight }}
+                                                    value={demanda}
+                                                    onChange={(e) => setDemanda(e.target.value)}
+                                                    placeholder="Digite a demanda..."
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="flex items-center text-xs font-bold text-[var(--muted)] mb-2 uppercase tracking-wider">
+                                                    <Hash size={12} className="mr-1.5" /> Número Cliente
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] p-3 text-sm placeholder-[var(--muted)] transition-all focus:outline-none"
+                                                    style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)', color: silverTextLight }}
+                                                    value={numeroCliente}
+                                                    onChange={(e) => setNumeroCliente(e.target.value)}
+                                                    placeholder="Digite o número..."
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Send Button */}
+                            <div className="flex justify-end">
                                 <button
                                     type="submit"
                                     disabled={loading || !selectedSession || !selectedTemplate}
-                                    className="flex items-center space-x-2 bg-yellow-600/20 border border-[#FFE600] text-[#FFE600] px-6 py-3 rounded-md hover:bg-yellow-600/40 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex items-center space-x-3 px-8 py-3.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-bold text-sm tracking-wide transition-all"
+                                    style={{ background: 'linear-gradient(145deg, #92700C 0%, #BF9B30 15%, #DBCA6E 35%, #FFEC8A 50%, #DBCA6E 65%, #BF9B30 85%, #92700C 100%)', color: '#1A1200', border: '1px solid rgba(255,236,138,0.3)', boxShadow: '0 4px 15px rgba(212,175,55,0.3), inset 0 1px 0 rgba(255,250,220,0.4), inset 0 -1px 0 rgba(146,112,12,0.3)', textShadow: '0 1px 0 rgba(255,250,220,0.3)' }}
                                 >
-                                    <Send size={20} />
+                                    <Send size={18} />
                                     <span>{loading ? 'Enviando...' : 'Enviar Mensagem'}</span>
                                 </button>
                             </div>
                         </form>
                     </div>
 
-                    {/* Right Column: Preview & Chatwoot Data */}
-                    <div className="space-y-8 h-fit sticky top-8">
+                    {/* Right Column: Preview (2 cols) */}
+                    <div className="lg:col-span-2 space-y-6 h-fit lg:sticky lg:top-8">
                         {/* Preview Card */}
-                        <div className="bg-[#1E1E1E] rounded-lg shadow-lg border border-[#333] p-6">
-                            <h2 className="text-xl font-bold neon-text mb-4">Pré-visualização</h2>
+                        <div className="premium-card rounded-xl p-6 relative" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
+                            <div className="flex items-center space-x-3 mb-5">
+                                <Eye size={18} style={{ color: '#D4AF37' }} />
+                                <h2 className="text-lg font-bold tracking-tight" style={silverGradientStyle}>Pré-visualização</h2>
+                            </div>
 
                             {!selectedTemplate ? (
-                                <div className="flex items-center justify-center h-48 border-2 border-dashed border-[#333] rounded-lg text-[#FFE600] opacity-50">
-                                    Selecione um template para visualizar
+                                <div className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-[var(--border)] rounded-xl text-[var(--muted)] space-y-3">
+                                    <MessageSquare size={32} className="opacity-30" />
+                                    <span className="text-sm">Selecione um template</span>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {/* Template Metadata Header */}
-                                    <div className="flex justify-between items-center mb-2 px-1">
-                                        {selectedTemplate.categoria && (
-                                            <div className="text-xs font-bold text-[#FFE600] bg-yellow-900/30 px-2 py-1 rounded border border-yellow-600/30 uppercase tracking-wider">
-                                                {selectedTemplate.categoria}
-                                            </div>
+                                    {/* Template Meta */}
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md" style={{ background: 'rgba(212,175,55,0.1)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.2)' }}>
+                                            {selectedTemplate.nome}
+                                        </span>
+                                        {selectedTemplate.linguagem === 'pt_BR' ? (
+                                            <img src="https://flagcdn.com/w40/br.png" alt="Brasil" title="Português (Brasil)" className="w-7 h-auto rounded shadow-sm opacity-80" />
+                                        ) : (
+                                            <span className="text-xs font-bold uppercase" style={{ color: '#D4AF37' }}>{selectedTemplate.linguagem}</span>
                                         )}
-                                        <div className="text-sm font-medium ml-auto">
-                                            {selectedTemplate.linguagem === 'pt_BR' ? (
-                                                <img
-                                                    src="https://flagcdn.com/w40/br.png"
-                                                    alt="Brasil"
-                                                    title="Português (Brasil)"
-                                                    className="w-8 h-auto rounded shadow-sm"
-                                                />
-                                            ) : (
-                                                <span className="text-red-500 font-bold uppercase">{selectedTemplate.linguagem}</span>
-                                            )}
-                                        </div>
                                     </div>
 
-                                    <div className="p-4 bg-[#121212] rounded-lg border border-[#333] min-h-[200px] whitespace-pre-wrap leading-relaxed text-[#FFE600]">
-                                        {(() => {
-                                            let text = selectedTemplate.texto;
-                                            if (selectedTemplate.variaveis && Array.isArray(selectedTemplate.variaveis)) {
-                                                selectedTemplate.variaveis.forEach((variable: string) => {
-                                                    const value = variableValues[variable];
-                                                    if (value) {
-                                                        text = text.replace(new RegExp(`{{${variable}}}`, 'g'), value);
-                                                    }
-                                                });
-                                            }
-                                            return text;
-                                        })()}
+                                    {/* Message bubble */}
+                                    <div className="relative">
+                                        <div className="p-4 rounded-xl text-sm whitespace-pre-wrap leading-relaxed" style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', color: silverTextLight }}>
+                                            {(() => {
+                                                let text = selectedTemplate.texto;
+                                                if (selectedTemplate.variaveis && Array.isArray(selectedTemplate.variaveis)) {
+                                                    selectedTemplate.variaveis.forEach((variable: string) => {
+                                                        const value = variableValues[variable];
+                                                        if (value) {
+                                                            text = text.replace(new RegExp(`{{${variable}}}`, 'g'), value);
+                                                        }
+                                                    });
+                                                }
+                                                return text;
+                                            })()}
+                                        </div>
                                     </div>
 
                                     {/* Template Buttons */}
                                     {selectedTemplate.botoes && Array.isArray(selectedTemplate.botoes) && selectedTemplate.botoes.length > 0 && (
-                                        <div className="space-y-2 mt-4">
+                                        <div className="space-y-2">
                                             {selectedTemplate.botoes.map((botao: string, index: number) => (
                                                 <div
                                                     key={index}
-                                                    className="w-full bg-[#121212] border border-[#FFE600] text-[#FFE600] text-center py-2.5 px-4 rounded shadow-sm font-medium hover:bg-yellow-900/20 transition-colors cursor-default opacity-80"
+                                                    className="w-full text-center py-2.5 px-4 rounded-lg text-sm font-medium cursor-default transition-all"
+                                                    style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', color: '#D4AF37' }}
                                                 >
                                                     {botao}
                                                 </div>
                                             ))}
                                         </div>
                                     )}
-                                    <div className="text-xs text-[#FFE600] opacity-50 text-right">
-                                        * Visualização aproximada de como a mensagem será enviada.
-                                    </div>
+                                    <p className="text-[10px] text-[var(--muted)] text-right opacity-60">* Visualização aproximada</p>
                                 </div>
                             )}
                         </div>
 
-                        {/* Chatwoot Data Card */}
-                        <div className="bg-[#1E1E1E] rounded-lg shadow-lg border border-[#333] p-6">
-                            <h2 className="text-xl font-bold neon-text mb-6">Chatwoot</h2>
-                            <div className="space-y-6">
-                                <div>
-                                    <span className="block text-xs font-bold text-[#FFE600] uppercase tracking-wider mb-2 opacity-80">
-                                        Tags Selecionadas
-                                    </span>
-                                    <div className="flex flex-wrap gap-2">
-                                        {selectedTags.length > 0 ? selectedTags.map(tag => (
-                                            <span key={tag} className="px-3 py-1 bg-yellow-900/40 border border-yellow-600/50 rounded-full text-xs text-[#FFE600] font-medium">
-                                                {tag}
-                                            </span>
-                                        )) : <span className="text-sm opacity-50 italic">Nenhuma tag selecionada</span>}
-                                    </div>
+                        {/* Chatwoot Summary */}
+                        {selectedSession && (
+                            <div className="premium-card rounded-xl p-6 relative animate-fade-in" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
+                                <div className="flex items-center space-x-3 mb-5">
+                                    <MessageSquare size={18} style={{ color: '#D4AF37' }} />
+                                    <h2 className="text-lg font-bold tracking-tight" style={silverGradientStyle}>Resumo do Envio</h2>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-4">
                                     <div>
-                                        <span className="block text-xs font-bold text-[#FFE600] uppercase tracking-wider mb-2 opacity-80">
-                                            Demanda
-                                        </span>
-                                        <div className="p-3 bg-[#121212] rounded border border-[#333] text-sm text-[#FFE600] min-h-[46px] flex items-center">
-                                            {demanda || <span className="opacity-30 italic">Vazio</span>}
+                                        <span className="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider mb-2">Tags</span>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {selectedTags.length > 0 ? selectedTags.map(tag => (
+                                                <span key={tag} className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: 'rgba(212,175,55,0.12)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)' }}>
+                                                    {tag}
+                                                </span>
+                                            )) : <span className="text-xs text-[var(--muted)] italic opacity-50">Nenhuma</span>}
                                         </div>
                                     </div>
-                                    <div>
-                                        <span className="block text-xs font-bold text-[#FFE600] uppercase tracking-wider mb-2 opacity-80">
-                                            Número Cliente
-                                        </span>
-                                        <div className="p-3 bg-[#121212] rounded border border-[#333] text-sm text-[#FFE600] min-h-[46px] flex items-center">
-                                            {numeroCliente || <span className="opacity-30 italic">Vazio</span>}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <span className="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider mb-1.5">Demanda</span>
+                                            <div className="p-2.5 bg-[var(--background)] rounded-lg border border-[var(--border)] text-sm min-h-[40px] flex items-center" style={{ color: silverTextLight }}>
+                                                {demanda || <span className="opacity-25 italic text-xs">—</span>}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span className="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider mb-1.5">Nº Cliente</span>
+                                            <div className="p-2.5 bg-[var(--background)] rounded-lg border border-[var(--border)] text-sm min-h-[40px] flex items-center" style={{ color: silverTextLight }}>
+                                                {numeroCliente || <span className="opacity-25 italic text-xs">—</span>}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </main>

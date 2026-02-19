@@ -80,8 +80,11 @@ export default function UsersPage() {
 
     if (authLoading || loading) {
         return (
-            <div className="flex h-screen bg-[#121212] text-[#FFE600] items-center justify-center">
-                <div className="text-xl">Carregando...</div>
+            <div className="flex h-screen bg-[var(--background)] items-center justify-center">
+                <div className="flex flex-col items-center space-y-4">
+                    <div className="skeleton h-4 w-48"></div>
+                    <div className="skeleton h-3 w-32"></div>
+                </div>
             </div>
         );
     }
@@ -96,13 +99,13 @@ export default function UsersPage() {
             header: 'Role',
             accessor: 'role',
             render: (user: any) => {
-                const roleMap: Record<string, { label: string; className: string }> = {
-                    admin: { label: 'ADMINISTRADOR', className: 'text-black drop-shadow-[0_0_5px_rgba(255,255,255,1)] font-extrabold' },
-                    operador: { label: 'OPERADOR', className: 'text-blue-500 drop-shadow-[0_0_3px_rgba(59,130,246,0.8)]' },
-                    vendedor: { label: 'VENDEDOR', className: 'text-green-500 drop-shadow-[0_0_3px_rgba(34,197,94,0.8)]' },
+                const roleStyles: Record<string, { label: string; gradient: string; shadow: string }> = {
+                    admin: { label: 'ADMINISTRADOR', gradient: 'linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%)', shadow: '0 0 4px rgba(212,175,55,0.5)' },
+                    operador: { label: 'OPERADOR', gradient: 'linear-gradient(135deg, #1E5FA8 0%, #7EC8E3 25%, #2B6CB0 50%, #A3D9F5 75%, #1A4F8B 100%)', shadow: '0 0 4px rgba(59,130,246,0.5)' },
+                    vendedor: { label: 'VENDEDOR', gradient: 'linear-gradient(135deg, #1B7A3D 0%, #7EEAA0 25%, #228B47 50%, #A8F0C0 75%, #166B34 100%)', shadow: '0 0 4px rgba(34,197,94,0.5)' },
                 };
-                const config = roleMap[user.role] || { label: user.role, className: 'text-[#FFE600]' };
-                return <span className={`font-bold ${config.className}`}>{config.label}</span>;
+                const config = roleStyles[user.role] || { label: user.role, gradient: 'linear-gradient(135deg, #BF953F, #FCF6BA, #AA771C)', shadow: 'none' };
+                return <span className="font-extrabold" style={{ background: config.gradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', filter: `drop-shadow(${config.shadow})` }}>{config.label}</span>;
             }
         },
         {
@@ -110,7 +113,7 @@ export default function UsersPage() {
             accessor: (user: any) => (
                 <button
                     onClick={() => handleEditClick(user)}
-                    className="text-[#FFE600] opacity-80 hover:text-[#FFE600] hover:opacity-100 transition-colors"
+                    className="text-[var(--primary)] opacity-80 hover:text-[var(--primary)] hover:opacity-100 transition-colors cursor-pointer"
                 >
                     <Edit2 size={18} />
                 </button>
@@ -119,22 +122,25 @@ export default function UsersPage() {
     ];
 
     return (
-        <div className="flex h-screen bg-[#121212] text-[#FFE600]">
+        <div className="flex bg-[var(--background)] min-h-screen">
             <Sidebar />
             <main className="flex-1 ml-64 p-8 overflow-y-auto">
                 <header className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold neon-text">Controle de Usuários</h1>
+                    <div>
+                        <h1 className="text-3xl font-bold gold-gradient tracking-tight">Controle de Usuários</h1>
+                        <p className="text-[var(--muted)] mt-1">Gerencie os usuários e permissões do sistema.</p>
+                    </div>
                     <div className="flex space-x-4">
                         <button
                             onClick={handleLinkChatwoot}
-                            className="bg-blue-600/20 border border-blue-500 text-blue-500 px-4 py-2 rounded-md hover:bg-blue-600/40 transition font-semibold"
+                            className="bg-blue-600/20 border border-blue-500/50 text-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600/40 transition-all font-semibold shadow-lg shadow-blue-500/10"
                         >
                             Linkar Chatwoot
                         </button>
                     </div>
                 </header>
 
-                <div className="bg-[#1E1E1E] rounded-lg shadow-lg border border-[#333] p-6">
+                <div className="bg-[var(--surface)] rounded-xl shadow-lg border border-[var(--border)] p-6">
                     <DataTable
                         data={users}
                         columns={columns}
@@ -150,19 +156,19 @@ export default function UsersPage() {
                     {editingUser && (
                         <form onSubmit={handleSaveUser} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">Nome</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">Nome</label>
                                 <input
                                     type="text"
                                     required
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border placeholder-yellow-900/50"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 border transition-all placeholder-[var(--muted)]"
                                     value={editingUser.nome || ''}
                                     onChange={(e) => setEditingUser({ ...editingUser, nome: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-[#FFE600]">Role</label>
+                                <label className="block text-sm font-medium text-[var(--muted)]">Role</label>
                                 <select
-                                    className="mt-1 block w-full rounded-md border-[#333] bg-[#121212] text-[#FFE600] shadow-sm focus:border-[#FFE600] focus:ring-[#FFE600] sm:text-sm p-2 border"
+                                    className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 border transition-all"
                                     value={editingUser.role || 'vendedor'}
                                     onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
                                 >
@@ -175,14 +181,14 @@ export default function UsersPage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsEditModalOpen(false)}
-                                    className="px-4 py-2 border border-[#FFE600] rounded-md text-sm font-medium text-[#FFE600] hover:bg-yellow-600/20"
+                                    className="px-4 py-2 border border-[var(--border)] rounded-lg text-sm font-medium text-[var(--muted)] hover:bg-[var(--surface-highlight)] transition-colors"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-[#FFE600] bg-yellow-600/20 hover:bg-yellow-600/40 disabled:opacity-50"
+                                    className="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-bold text-black bg-[var(--primary)] hover:bg-[var(--primary-hover)] transition-all disabled:opacity-50"
                                 >
                                     {isSaving ? 'Salvando...' : 'Salvar'}
                                 </button>

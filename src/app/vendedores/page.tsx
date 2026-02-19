@@ -77,8 +77,11 @@ export default function VendedoresPage() {
 
     if (authLoading || loading) {
         return (
-            <div className="flex h-screen bg-[#121212] text-[#FFE600] items-center justify-center">
-                <div className="text-xl">Carregando...</div>
+            <div className="flex h-screen bg-[var(--background)] items-center justify-center">
+                <div className="flex flex-col items-center space-y-4">
+                    <div className="skeleton h-4 w-48"></div>
+                    <div className="skeleton h-3 w-32"></div>
+                </div>
             </div>
         );
     }
@@ -86,44 +89,44 @@ export default function VendedoresPage() {
     if (!hasRole(['admin', 'operador'])) return null;
 
     return (
-        <div className="flex h-screen bg-[#121212] text-[#FFE600] overflow-hidden">
+        <div className="flex bg-[var(--background)] min-h-screen overflow-hidden">
             <Sidebar />
             <main className="flex-1 ml-64 h-full overflow-y-auto p-8 pb-12">
                 <header className="mb-8">
-                    <h1 className="text-3xl font-bold neon-text">Vendedores</h1>
-                    <p className="text-[#FFE600] opacity-80">Gestão de Contas de Vendedores</p>
+                    <h1 className="text-3xl font-bold tracking-tight" style={{ background: 'linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Vendedores</h1>
+                    <p className="text-[var(--muted)] mt-1">Gestão de Contas de Vendedores</p>
                 </header>
 
-                <div className="bg-[#1E1E1E] rounded-lg shadow-lg border border-[#333] overflow-hidden">
+                <div className="bg-[var(--surface)] rounded-xl shadow-lg border border-[var(--border)] overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-[#2a2a2a] border-b border-[#333] text-[#FFE600] uppercase text-xs font-bold tracking-wider">
+                                <tr className="bg-[var(--surface-highlight)] border-b border-[var(--border)] text-[var(--muted)] uppercase text-xs font-semibold tracking-wider">
                                     <th className="p-4">ID</th>
                                     <th className="p-4">Nome</th>
                                     <th className="p-4 text-center">Quantidade Zaps</th>
                                     <th className="p-4 text-right">Detalhes</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#333]">
+                            <tbody className="divide-y divide-[var(--border)]">
                                 {vendedores.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="p-8 text-center text-gray-500">
+                                        <td colSpan={4} className="p-8 text-center text-[var(--muted)] italic">
                                             Nenhum vendedor encontrado.
                                         </td>
                                     </tr>
                                 ) : (
                                     vendedores.map((vendedor) => (
                                         <React.Fragment key={vendedor.id}>
-                                            <tr className="hover:bg-[#252525] transition-colors">
-                                                <td className="p-4 font-mono text-sm opacity-80">{vendedor.id}</td>
-                                                <td className="p-4 font-medium">
+                                            <tr className="hover:bg-[var(--surface-highlight)] transition-colors duration-150 group">
+                                                <td className="p-4 font-mono text-sm text-[var(--muted)]">{vendedor.id}</td>
+                                                <td className="p-4 font-medium text-[var(--foreground)] group-hover:text-white transition-colors">
                                                     {vendedor.nome}
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     <span className={`font-bold ${Number(vendedor.quantidade_zaps) === 0
                                                         ? 'text-red-500'
-                                                        : 'text-[#FFE600]'
+                                                        : 'text-[var(--foreground)]'
                                                         }`}>
                                                         {vendedor.quantidade_zaps}
                                                     </span>
@@ -131,7 +134,7 @@ export default function VendedoresPage() {
                                                 <td className="p-4 text-right">
                                                     <button
                                                         onClick={() => toggleRow(vendedor.id)}
-                                                        className="p-2 hover:bg-yellow-600/20 rounded-full transition-colors"
+                                                        className="p-2 hover:bg-[var(--surface-highlight)] rounded-full transition-colors text-[var(--muted)] hover:text-[var(--foreground)]"
                                                         title={expandedRows[vendedor.id] ? "Ocultar Zaps" : "Ver Zaps"}
                                                     >
                                                         {expandedRows[vendedor.id] ? (
@@ -143,24 +146,24 @@ export default function VendedoresPage() {
                                                 </td>
                                             </tr>
                                             {expandedRows[vendedor.id] && (
-                                                <tr className="bg-[#181818]">
-                                                    <td colSpan={4} className="p-4 border-b border-[#333] pl-12">
-                                                        <div className="bg-[#121212] rounded-md border border-[#333] p-4">
-                                                            <h4 className="text-sm font-bold mb-3 text-gray-400 uppercase tracking-wider">
+                                                <tr className="bg-[var(--surface)]">
+                                                    <td colSpan={4} className="p-4 border-b border-[var(--border)] pl-12">
+                                                        <div className="bg-[var(--background)] rounded-lg border border-[var(--border)] p-4">
+                                                            <h4 className="text-sm font-bold mb-3 text-[var(--muted)] uppercase tracking-wider">
                                                                 Lista de Zaps Vinculados
                                                             </h4>
                                                             {(!vendedor.zaps || vendedor.zaps.length === 0) ? (
-                                                                <p className="text-sm text-gray-500 italic">Nenhum número vinculado.</p>
+                                                                <p className="text-sm text-[var(--muted)] italic">Nenhum número vinculado.</p>
                                                             ) : (
                                                                 <ul className="space-y-2">
                                                                     {vendedor.zaps.map((zap, idx) => (
-                                                                        <li key={idx} className="flex items-center gap-2 text-sm p-2 rounded hover:bg-[#1E1E1E] transition-colors border border-transparent hover:border-[#333]">
+                                                                        <li key={idx} className="flex items-center gap-2 text-sm p-2 rounded hover:bg-[var(--surface-highlight)] transition-colors border border-transparent hover:border-[var(--border)] text-[var(--foreground)]">
                                                                             <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                                                                            <span className="font-mono text-[#FFE600]">
+                                                                            <span className="font-mono">
                                                                                 {typeof zap === 'string' ? zap : (zap.numero || JSON.stringify(zap))}
                                                                             </span>
                                                                             {typeof zap !== 'string' && zap.status && (
-                                                                                <span className="text-xs text-gray-400 ml-2">({zap.status})</span>
+                                                                                <span className="text-xs text-[var(--muted)] ml-2">({zap.status})</span>
                                                                             )}
                                                                         </li>
                                                                     ))}

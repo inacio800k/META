@@ -42,23 +42,23 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#121212]">
-            <div className="bg-[#1E1E1E] p-8 rounded-lg shadow-lg w-96 border border-[#333]">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
+            <div className="bg-[var(--surface)] p-8 rounded-xl shadow-2xl w-96 border border-[var(--border)] premium-card">
                 <div className="flex justify-center mb-6">
-                    <UserPlus className="h-12 w-12 text-[#FFE600]" />
+                    <UserPlus className="h-12 w-12 text-[var(--primary)]" />
                 </div>
-                <h1 className="text-2xl font-bold mb-6 text-center text-[#FFE600] neon-text">Criar Conta</h1>
+                <h1 className="text-2xl font-bold mb-6 text-center tracking-tight" style={{ background: 'linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Criar Conta</h1>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-[#FFE600] mb-2">Nome</label>
-                        <div className="mt-1 relative rounded-md shadow-sm">
+                        <label className="block text-sm font-medium text-[var(--muted)] mb-2">Nome</label>
+                        <div className="mt-1 relative rounded-lg shadow-sm">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <UserPlus className="h-5 w-5 text-[#FFE600] opacity-50" />
+                                <UserPlus className="h-5 w-5 text-[var(--muted)]" />
                             </div>
                             <input
                                 type="text"
                                 required
-                                className="block w-full pl-10 sm:text-sm border-[#333] bg-[#121212] rounded-md p-3 border text-[#FFE600] placeholder-yellow-900/50 focus:border-[#FFE600] focus:ring-[#FFE600]"
+                                className="block w-full pl-10 sm:text-sm border-[var(--border)] bg-[var(--surface-highlight)] rounded-lg p-3 border text-[var(--foreground)] placeholder-[var(--muted)] focus:border-[var(--primary)] focus:ring-[var(--primary)] transition-all"
                                 placeholder="Seu Nome"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
@@ -67,15 +67,15 @@ export default function RegisterPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-[#FFE600] mb-2">Email</label>
-                        <div className="mt-1 relative rounded-md shadow-sm">
+                        <label className="block text-sm font-medium text-[var(--muted)] mb-2">Email</label>
+                        <div className="mt-1 relative rounded-lg shadow-sm">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Mail className="h-5 w-5 text-[#FFE600] opacity-50" />
+                                <Mail className="h-5 w-5 text-[var(--muted)]" />
                             </div>
                             <input
                                 type="email"
                                 required
-                                className="block w-full pl-10 sm:text-sm border-[#333] bg-[#121212] rounded-md p-3 border text-[#FFE600] placeholder-yellow-900/50 focus:border-[#FFE600] focus:ring-[#FFE600]"
+                                className="block w-full pl-10 sm:text-sm border-[var(--border)] bg-[var(--surface-highlight)] rounded-lg p-3 border text-[var(--foreground)] placeholder-[var(--muted)] focus:border-[var(--primary)] focus:ring-[var(--primary)] transition-all"
                                 placeholder="seu@email.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -84,15 +84,15 @@ export default function RegisterPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-[#FFE600] mb-2">Senha</label>
-                        <div className="mt-1 relative rounded-md shadow-sm">
+                        <label className="block text-sm font-medium text-[var(--muted)] mb-2">Senha</label>
+                        <div className="mt-1 relative rounded-lg shadow-sm">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Lock className="h-5 w-5 text-[#FFE600] opacity-50" />
+                                <Lock className="h-5 w-5 text-[var(--muted)]" />
                             </div>
                             <input
                                 type="password"
                                 required
-                                className="block w-full pl-10 sm:text-sm border-[#333] bg-[#121212] rounded-md p-3 border text-[#FFE600] placeholder-yellow-900/50 focus:border-[#FFE600] focus:ring-[#FFE600]"
+                                className="block w-full pl-10 sm:text-sm border-[var(--border)] bg-[var(--surface-highlight)] rounded-lg p-3 border text-[var(--foreground)] placeholder-[var(--muted)] focus:border-[var(--primary)] focus:ring-[var(--primary)] transition-all"
                                 placeholder="********"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -101,36 +101,58 @@ export default function RegisterPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-[#FFE600] mb-2">Função</label>
-                        <div className="mt-1 relative rounded-md shadow-sm">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Shield className="h-5 w-5 text-[#FFE600] opacity-50" />
-                            </div>
-                            <select
-                                required
-                                className="block w-full pl-10 sm:text-sm border-[#333] bg-[#121212] rounded-md p-3 border text-[#FFE600] placeholder-yellow-900/50 focus:border-[#FFE600] focus:ring-[#FFE600] appearance-none"
-                                value={role}
-                                onChange={(e) => setRole(e.target.value as Role)}
+                        <label className="block text-sm font-medium text-[var(--muted)] mb-2">Função</label>
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setRole('vendedor' as Role)}
+                                className="flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all cursor-pointer"
+                                style={role === 'vendedor' ? {
+                                    background: 'linear-gradient(145deg, #0A5C1A 0%, #1B8C3A 15%, #3DBF5E 35%, #6EE88A 50%, #3DBF5E 65%, #1B8C3A 85%, #0A5C1A 100%)',
+                                    color: '#0A2010',
+                                    border: '1px solid rgba(110,232,138,0.4)',
+                                    boxShadow: '0 4px 15px rgba(59,191,94,0.35), inset 0 1px 0 rgba(110,232,138,0.4), inset 0 -1px 0 rgba(10,92,26,0.3)',
+                                    textShadow: '0 1px 0 rgba(110,232,138,0.3)'
+                                } : {
+                                    background: 'rgba(59,191,94,0.08)',
+                                    color: '#3DBF5E',
+                                    border: '1px solid rgba(59,191,94,0.25)'
+                                }}
                             >
-                                <option value="vendedor">VENDEDOR</option>
-                                <option value="operador">OPERADOR</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <span className="text-[#FFE600] text-xs opacity-50">▼</span>
-                            </div>
+                                VENDEDOR
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setRole('operador' as Role)}
+                                className="flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all cursor-pointer"
+                                style={role === 'operador' ? {
+                                    background: 'linear-gradient(145deg, #0A3B6C 0%, #1B6BBF 15%, #3D8EDB 35%, #6EB8F0 50%, #3D8EDB 65%, #1B6BBF 85%, #0A3B6C 100%)',
+                                    color: '#0A1830',
+                                    border: '1px solid rgba(110,184,240,0.4)',
+                                    boxShadow: '0 4px 15px rgba(59,142,219,0.35), inset 0 1px 0 rgba(110,184,240,0.4), inset 0 -1px 0 rgba(10,59,108,0.3)',
+                                    textShadow: '0 1px 0 rgba(110,184,240,0.3)'
+                                } : {
+                                    background: 'rgba(59,142,219,0.08)',
+                                    color: '#3D8EDB',
+                                    border: '1px solid rgba(59,142,219,0.25)'
+                                }}
+                            >
+                                OPERADOR
+                            </button>
                         </div>
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full flex justify-center py-3 px-4 border border-[#FFE600] rounded-md shadow-sm text-sm font-bold text-[#FFE600] bg-yellow-600/20 hover:bg-yellow-600/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFE600] disabled:opacity-50 transition p-3"
+                        className="w-full flex justify-center py-3 px-4 rounded-lg text-sm font-bold disabled:opacity-50 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                        style={{ background: 'linear-gradient(145deg, #92700C 0%, #BF9B30 15%, #DBCA6E 35%, #FFEC8A 50%, #DBCA6E 65%, #BF9B30 85%, #92700C 100%)', color: '#1A1200', border: '1px solid rgba(255,236,138,0.3)', boxShadow: '0 4px 15px rgba(212,175,55,0.3), inset 0 1px 0 rgba(255,250,220,0.4), inset 0 -1px 0 rgba(146,112,12,0.3)', textShadow: '0 1px 0 rgba(255,250,220,0.3)' }}
                     >
                         {loading ? 'Cadastrando...' : 'Cadastrar'}
                     </button>
                 </form>
                 <div className="mt-6 text-center">
-                    <Link href="/login" className="flex items-center justify-center text-sm text-[#FFE600] hover:text-[#FFE600]/80 transition-colors opacity-80 hover:opacity-100">
+                    <Link href="/login" className="flex items-center justify-center text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors">
                         <ArrowLeft size={16} className="mr-1" />
                         Voltar para Login
                     </Link>
