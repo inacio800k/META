@@ -133,6 +133,18 @@ export const dataService = {
         return await response.json();
     },
 
+    editReport: async (data: any): Promise<any> => {
+        const response = await fetch('/api/reports/edit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Failed to edit report');
+        return await response.json();
+    },
+
     initMessages: async (user?: any): Promise<any> => {
         const response = await fetch('/api/messages/init', {
             method: 'POST',

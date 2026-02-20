@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { dataService } from '@/services/dataService';
 import { useToast } from '@/contexts/ToastContext';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Edit2 } from 'lucide-react';
+import { Modal } from '@/components/ui/Modal';
 
 export default function ReportsPage() {
     const { hasRole, loading: authLoading } = usePermission();
@@ -16,26 +17,51 @@ export default function ReportsPage() {
     const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
     const [deleting, setDeleting] = useState(false);
 
+    // Edit State
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingReport, setEditingReport] = useState<any>(null);
+    const [isSaving, setIsSaving] = useState(false);
+
     useEffect(() => {
         if (!authLoading && !hasRole(['admin'])) {
             router.push('/');
         }
     }, [authLoading, hasRole, router]);
 
+    const fetchReports = async () => {
+        try {
+            const data = await dataService.getReports();
+            setReports(data);
+        } catch (error) {
+            console.error('Error fetching reports:', error);
+        }
+    };
+
     useEffect(() => {
         if (authLoading || !hasRole(['admin'])) return;
-
-        const fetchReports = async () => {
-            try {
-                const data = await dataService.getReports();
-                setReports(data);
-            } catch (error) {
-                console.error('Error fetching reports:', error);
-            }
-        };
-
         fetchReports();
     }, [authLoading, hasRole]);
+
+    const handleEditClick = (report: any) => {
+        setEditingReport({ ...report });
+        setIsEditModalOpen(true);
+    };
+
+    const handleSaveReport = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSaving(true);
+        try {
+            await dataService.editReport(editingReport);
+            showToast('Relatório atualizado com sucesso!', 'success');
+            setIsEditModalOpen(false);
+            fetchReports(); // Refresh list
+        } catch (error: any) {
+            console.error('Error updating report:', error);
+            showToast(`Erro ao atualizar relatório: ${error.message}`, 'error');
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const handleDelete = async () => {
         if (!deleteTarget) return;
@@ -182,7 +208,33 @@ export default function ReportsPage() {
                                                     </td>
                                                 );
                                             })}
-                                            <td style={{ padding: '12px 8px', textAlign: 'center', width: '60px' }}>
+                                            <td style={{ padding: '12px 8px', textAlign: 'center', width: '80px', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                                <button
+                                                    onClick={() => handleEditClick(report)}
+                                                    title="Editar relatório"
+                                                    style={{
+                                                        background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 40%, #3B82F6 60%, #2563EB 80%, #1E3A8A 100%)',
+                                                        border: '1px solid rgba(37, 99, 235, 0.5)',
+                                                        borderRadius: '8px',
+                                                        padding: '6px 8px',
+                                                        cursor: 'pointer',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        transition: 'all 150ms',
+                                                        boxShadow: '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(59,130,246,0.3)',
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.currentTarget.style.background = 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 40%, #60A5FA 60%, #3B82F6 80%, #1E40AF 100%)';
+                                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(37,99,235,0.5), inset 0 1px 0 rgba(96,165,250,0.4)';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.background = 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 40%, #3B82F6 60%, #2563EB 80%, #1E3A8A 100%)';
+                                                        e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(59,130,246,0.3)';
+                                                    }}
+                                                >
+                                                    <Edit2 size={14} color="#BFDBFE" />
+                                                </button>
                                                 <button
                                                     onClick={() => setDeleteTarget(report)}
                                                     title="Excluir relatório"
@@ -312,6 +364,60 @@ export default function ReportsPage() {
                     </div>
                 </div>
             )}
+
+            <Modal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                title="Editar Relatório"
+            >
+                {editingReport && (
+                    <form onSubmit={handleSaveReport} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--muted)]">Status</label>
+                            <input
+                                type="text"
+                                className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 border transition-all placeholder-[var(--muted)]"
+                                value={editingReport.status_chamada || ''}
+                                onChange={(e) => setEditingReport({ ...editingReport, status_chamada: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--muted)]">Tipo de Chamada</label>
+                            <input
+                                type="text"
+                                className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 border transition-all placeholder-[var(--muted)]"
+                                value={editingReport.tipo_chamada || ''}
+                                onChange={(e) => setEditingReport({ ...editingReport, tipo_chamada: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--muted)]">Atendente</label>
+                            <input
+                                type="text"
+                                className="mt-1 block w-full rounded-lg border-[var(--border)] bg-[var(--surface-highlight)] text-[var(--foreground)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)] sm:text-sm p-2.5 border transition-all placeholder-[var(--muted)]"
+                                value={editingReport.nome_atendente || ''}
+                                onChange={(e) => setEditingReport({ ...editingReport, nome_atendente: e.target.value })}
+                            />
+                        </div>
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button
+                                type="button"
+                                onClick={() => setIsEditModalOpen(false)}
+                                className="px-4 py-2 border border-[var(--border)] rounded-lg text-sm font-medium text-[var(--muted)] hover:bg-[var(--surface-highlight)] transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={isSaving}
+                                className="px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-bold text-black bg-[var(--primary)] hover:bg-[var(--primary-hover)] transition-all disabled:opacity-50"
+                            >
+                                {isSaving ? 'Salvando...' : 'Salvar'}
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </Modal>
         </div>
     );
 }
