@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { DataTable } from '@/components/ui/DataTable';
 import { dataService } from '@/services/dataService';
-import { Edit2 } from 'lucide-react';
+import { Edit2, Link } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/contexts/ToastContext';
 
@@ -133,9 +133,17 @@ export default function UsersPage() {
                     <div className="flex space-x-4">
                         <button
                             onClick={handleLinkChatwoot}
-                            className="bg-blue-600/20 border border-blue-500/50 text-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600/40 transition-all font-semibold shadow-lg shadow-blue-500/10"
+                            className="flex items-center space-x-2 px-6 py-2.5 rounded-lg cursor-pointer font-bold text-sm tracking-wide transition-all shadow-lg hover:scale-105 active:scale-95"
+                            style={{
+                                background: 'linear-gradient(145deg, #1E5FA8 0%, #2B6CB0 15%, #7EC8E3 35%, #A3D9F5 50%, #7EC8E3 65%, #2B6CB0 85%, #1E5FA8 100%)',
+                                color: '#091522',
+                                border: '1px solid rgba(163,217,245,0.3)',
+                                boxShadow: '0 4px 15px rgba(30,95,168,0.3), inset 0 1px 0 rgba(163,217,245,0.4)',
+                                textShadow: '0 1px 0 rgba(163,217,245,0.3)',
+                            }}
                         >
-                            Linkar Chatwoot
+                            <Link size={16} />
+                            <span>Linkar Chatwoot</span>
                         </button>
                     </div>
                 </header>
