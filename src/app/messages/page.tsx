@@ -35,6 +35,8 @@ export default function MessagesPage() {
     const [selectedClient, setSelectedClient] = useState<any>(null);
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
 
+    const todayStr = new Date().toISOString().split('T')[0];
+
     // Date state (default to yesterday)
     const [selectedDate, setSelectedDate] = useState(() => {
         const date = new Date();
@@ -339,10 +341,16 @@ export default function MessagesPage() {
                                                 </label>
                                                 <input
                                                     type="date"
-                                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] p-2.5 text-sm placeholder-[var(--muted)] transition-all focus:outline-none"
-                                                    style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)', color: silverTextLight, colorScheme: 'dark' }}
+                                                    max={todayStr}
+                                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] p-2.5 text-sm placeholder-[var(--muted)] transition-all focus:outline-none cursor-pointer"
+                                                    style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)', color: silverTextLight, colorScheme: 'dark', accentColor: '#D4AF37' }}
                                                     value={selectedDate}
                                                     onChange={(e) => setSelectedDate(e.target.value)}
+                                                    onClick={(e) => {
+                                                        if ('showPicker' in HTMLInputElement.prototype) {
+                                                            (e.target as HTMLInputElement).showPicker();
+                                                        }
+                                                    }}
                                                 />
                                             </div>
                                             <div>
@@ -419,9 +427,9 @@ export default function MessagesPage() {
                                                                 setSelectedTags(firstItem.tags);
                                                             }
 
-                                                            if (firstItem.numer_cliente || firstItem.numero_cliente) {
-                                                                setNumeroCliente(firstItem.numer_cliente || firstItem.numero_cliente);
-                                                            }
+                                                            // Extract and sanitize numero_cliente
+                                                            const numCliente = firstItem.numero_cliente || firstItem.numer_cliente || clientResult?.numero_cliente || clientResult?.numer_cliente || clientResult?.telefone || clientResult?.['TELEFONE'] || '';
+                                                            setNumeroCliente(numCliente ? String(numCliente).replace(/\D/g, '').slice(0, 13) : '');
 
                                                             if (firstItem.variaveis && Array.isArray(firstItem.variaveis)) {
                                                                 const newVarValues: Record<string, string> = {};
@@ -433,6 +441,7 @@ export default function MessagesPage() {
                                                             }
                                                         } else {
                                                             setSelectedClient(null);
+                                                            setNumeroCliente('');
                                                             showToast('Nenhum cliente encontrado com os dados informados.', 'error');
                                                         }
                                                     }
