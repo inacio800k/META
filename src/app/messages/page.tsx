@@ -5,7 +5,7 @@ import { usePermission } from '@/hooks/usePermission';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { dataService } from '@/services/dataService';
-import { Send, MessageSquare, Eye, Tag, Hash, FileText, ChevronDown, Check, Search, Building2, Braces } from 'lucide-react';
+import { Send, MessageSquare, Eye, Tag, Hash, FileText, ChevronDown, Check, Search, Building2, Braces, Calendar } from 'lucide-react';
 import { ClientSelectionModal } from '@/components/ClientSelectionModal';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -34,6 +34,13 @@ export default function MessagesPage() {
     const [clientResults, setClientResults] = useState<any[]>([]);
     const [selectedClient, setSelectedClient] = useState<any>(null);
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+
+    // Date state (default to yesterday)
+    const [selectedDate, setSelectedDate] = useState(() => {
+        const date = new Date();
+        date.setDate(date.getDate() - 1);
+        return date.toISOString().split('T')[0];
+    });
 
     const templateDropdownRef = useRef<HTMLDivElement>(null);
     const tagsDropdownRef = useRef<HTMLDivElement>(null);
@@ -183,6 +190,7 @@ export default function MessagesPage() {
                 tags: selectedTags,
                 demanda,
                 numero_cliente: numeroCliente,
+                dados_cliente: selectedClient,
                 usuario: user
             };
 
@@ -234,7 +242,7 @@ export default function MessagesPage() {
                     <div className="lg:col-span-3 space-y-6">
                         <form onSubmit={handleSendMessage} className="space-y-6">
                             {/* Step 1: Configuração (Sessão + Template) */}
-                            <div className="premium-card rounded-xl p-4 relative" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
+                            <div className="premium-card rounded-xl p-4 relative z-50" style={{ borderTop: '2px solid rgba(212,175,55,0.4)' }}>
                                 <div className="flex items-center space-x-3 mb-3">
                                     <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: 'linear-gradient(135deg, #BF953F, #D4AF37)', color: '#1A1200' }}>1</div>
                                     <h3 className="text-sm font-bold uppercase tracking-wider" style={silverGradientStyle}>Configuração</h3>
@@ -324,7 +332,19 @@ export default function MessagesPage() {
                                     </div>
 
                                     <div className="space-y-3">
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div>
+                                                <label className="flex items-center text-[10px] font-bold text-[var(--muted)] mb-1.5 uppercase tracking-wider">
+                                                    <Calendar size={10} className="mr-1" /> Data
+                                                </label>
+                                                <input
+                                                    type="date"
+                                                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] p-2.5 text-sm placeholder-[var(--muted)] transition-all focus:outline-none"
+                                                    style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)', color: silverTextLight, colorScheme: 'dark' }}
+                                                    value={selectedDate}
+                                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                                />
+                                            </div>
                                             <div>
                                                 <label className="flex items-center text-[10px] font-bold text-[var(--muted)] mb-1.5 uppercase tracking-wider">
                                                     <Building2 size={10} className="mr-1" /> Empresa
@@ -375,6 +395,7 @@ export default function MessagesPage() {
                                                             sessao: sessionData,
                                                             empresa,
                                                             tipo: tipoCliente,
+                                                            data: selectedDate,
                                                             template: selectedTemplate,
                                                         }),
                                                     });
